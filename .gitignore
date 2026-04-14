@@ -1,0 +1,37 @@
+# Fichiers binaires
+*.a
+*.o
+*.so
+*.out
+myftp
+
+# Dossiers de build
+/build
+build/
+
+# Dossiers spécifiques à certains IDE
+.vscode/
+.cache/
+/.idea/
+/CMakeLists.transmitt.user
+
+# Fichiers d'éditeur (Vi, Emacs, etc.)
+*~
+*#
+compile_commands.json
+.cache
+
+# Fichiers criterion
+*.gcda
+*.gcno
+
+# binaire de tests
+*.gcda
+*.gcno
+
+# env
+venv/
+
+# Cache
+__pycache__/
+.venv/
