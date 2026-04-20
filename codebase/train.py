@@ -1,10 +1,14 @@
 import gymnasium as gym
 
-env = gym.make("LunarLander-v3", render_mode="human") # discrete by default
-obs, info = env.reset(seed = 42)
+env = gym.make("LunarLander-v3", render_mode="human")
 
-while True :
-    action = policy(obs) # random or learned
-    obs, r, terminated, truncated, info = env.step(action)
+observation, info = env.reset(seed=42)
+for _ in range(1000):
+    action = env.action_space.sample()
+
+    observation, reward, terminated, truncated, info = env.step(action)
+
     if terminated or truncated:
-        obs, info = env.reset()
+        observation, info = env.reset()
+
+env.close()
