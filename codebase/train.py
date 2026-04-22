@@ -1,4 +1,5 @@
 import gymnasium as gym
+from lunarDebug import LunarLanderDebug
 
 env = gym.make("LunarLander-v3", render_mode="human")
 
