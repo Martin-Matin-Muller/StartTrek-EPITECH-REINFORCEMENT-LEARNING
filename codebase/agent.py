@@ -1,3 +1,4 @@
+# IMPORT ===================================================
 import gymnasium as gym
 import numpy as np
 
@@ -17,19 +18,16 @@ import argparse
 import itertools
 
 import os
+#========================================================
 
-######################### LOG ###########################
-# For printing date and time
-DATE_FORMAT = "%m-%d %H:%M:%S"
-# Directory for saving run info
-RUNS_DIR = "runs"
+# LOG ===================================================
+DATE_FORMAT = "%m-%d %H:%M:%S"              # For printing date and time
+RUNS_DIR = "runs"                           # Directory for saving run info
 os.makedirs(RUNS_DIR, exist_ok=True)
-# 'Agg': used to generate plots as images and save them to a file instead of rendering to screen
-matplotlib.use('Agg')
+matplotlib.use('Agg') # generate plots as images and save them to a file instead of rendering to screen
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
-#########################################################
+#========================================================
 
-# Deep Q-Learning Agent
 class Agent():
 
     def __init__(self, hyperparameter_set):
@@ -61,9 +59,7 @@ class Agent():
         self.MODEL_FILE = os.path.join(RUNS_DIR, f'{self.hyperparameter_set}.pt')
         self.GRAPH_FILE = os.path.join(RUNS_DIR, f'{self.hyperparameter_set}.png')
 
-    def run(self, is_training=True, render=False):
-
-        # Active Log ==========================================================================
+    def _setup_logging(self, is_training):
         if is_training:
             start_time = datetime.now()
             last_graph_update_time = start_time
@@ -72,23 +68,20 @@ class Agent():
             print(log_message)
             with open(self.LOG_FILE, 'w') as file:
                 file.write(log_message + '\n')
-        #======================================================================================
+            return last_graph_update_time, log_message
+        return None, None
 
-        # Create instance of the environment and agent ========================================
-        if render:
-            env = gym.make("LunarLander-v3", render_mode="human")
-        else:
-            env = gym.make("LunarLander-v3", render_mode="rgb_array")
-
+    def _setup_training(self, is_training, env):
         num_actions = env.action_space.n
         num_states = env.observation_space.shape[0]
         policy_dqn = DQN(num_states, num_actions, self.fc1_nodes, self.enable_dueling_dqn).to(device)
-        #======================================================================================
 
-        # Setup training ressources or load agent =============================================
         if is_training:
             epsilon = self.epsilon_init
             memory = ReplayMemory(self.replay_memory_size)
+            epsilon_history = []
+            step_count=0
+            best_reward = -9999999
 
             # Create the target network and make it identical to the policy network
             target_dqn = DQN(num_states, num_actions, self.fc1_nodes, self.enable_dueling_dqn).to(device)
@@ -97,104 +90,148 @@ class Agent():
             # Policy network optimizer. "Adam" optimizer can be swapped to something else.
             self.optimizer = torch.optim.Adam(policy_dqn.parameters(), lr=self.learning_rate_a)
 
-            epsilon_history = []
-            step_count=0
-            best_reward = -9999999
+            return policy_dqn, target_dqn, memory, epsilon, epsilon_history, step_count, best_reward
         else:
             # Load learned policy and switch model to evaluation mode
             policy_dqn.load_state_dict(torch.load(self.MODEL_FILE))
             policy_dqn.eval()
+            return policy_dqn, None, None, None, None, None, None
+
+    def _training_update(self, is_training, episode, episode_reward, best_reward, rewards_per_episode,
+                          epsilon_history, memory, policy_dqn, target_dqn, epsilon, step_count,
+                          last_graph_update_time, log_message):
+        if not is_training:
+            return best_reward, epsilon, step_count, last_graph_update_time
+
+        # ===================== BEST MODEL =====================
+        if episode_reward > best_reward:
+            if best_reward != 0:
+                pct = (episode_reward - best_reward) / abs(best_reward) * 100
+            else:
+                pct = 0.0
+            log_message = (
+                f"{datetime.now().strftime(DATE_FORMAT)}: "
+                f"New best reward {episode_reward:0.1f} "
+                f"({pct:+.1f}%) "
+                f"at episode {episode}, saving model..."
+            )
+            print(log_message)
+
+            with open(self.LOG_FILE, 'a') as file:
+                file.write(log_message + '\n')
+
+            torch.save(policy_dqn.state_dict(), self.MODEL_FILE)
+
+            best_reward = episode_reward
+
+        # ===================== GRAPH UPDATE =====================
+        current_time = datetime.now()
+        if current_time - last_graph_update_time > timedelta(seconds=10):
+            self.save_graph(rewards_per_episode, epsilon_history)
+            last_graph_update_time = current_time
+
+        # ===================== TRAINING STEP =====================
+        if len(memory) > self.mini_batch_size:
+            mini_batch = memory.sample(self.mini_batch_size)
+            self.optimize(mini_batch, policy_dqn, target_dqn)
+
+            epsilon = max(epsilon * self.epsilon_decay, self.epsilon_min)
+            epsilon_history.append(epsilon)
+
+            step_count += 1
+
+            if step_count > self.network_sync_rate:
+                target_dqn.load_state_dict(policy_dqn.state_dict())
+                step_count = 0
+
+        return best_reward, epsilon, step_count, last_graph_update_time
+
+    def _run_episode(self, env, is_training, episode, policy_dqn, memory,
+                     epsilon, action_counts, step_count):
+
+        # ===================== RESET VARIABLES =====================
+        state, _ = env.reset()
+        state = torch.tensor(state, dtype=torch.float, device=device)
+
+        terminated = False
+        episode_reward = 0.0
+
+        max_steps = 1000
+        steps = 0
+
+        # ===================== LOOP START =====================
+        while not terminated and steps < max_steps:
+            steps += 1
+
+            # ===================== ACTION SELECTION =====================
+            if is_training and (random.random() < epsilon or episode < 100):
+                action = env.action_space.sample()
+                action = torch.tensor(action, dtype=torch.int64, device=device)
+            else:
+                with torch.no_grad():
+                    action = policy_dqn(state.unsqueeze(0)).squeeze().argmax()
+
+            # ===================== STEP ENV =====================
+            new_state, reward, terminated, _, _ = env.step(action.item())
+
+            episode_reward += reward
+
+            new_state = torch.tensor(new_state, dtype=torch.float, device=device)
+            reward = torch.tensor(reward, dtype=torch.float, device=device)
+
+            # ===================== MEMORY =====================
+            if is_training:
+                memory.append((state, action, new_state, reward, terminated))
+                step_count += 1
+
+            # ===================== STATE UPDATE =====================
+            state = new_state
+
+            # ===================== DEBUG =====================
+            action_counts[action.item()] += 1
+            print(f"episode : {episode} ----- action : {action_counts} ------ rewards : {episode_reward}")
+
+            # ===================== END =====================
+            if steps >= max_steps:
+                terminated = True
+
+        return episode_reward, step_count
+
+    def run(self, is_training=True, render=False):
+
+        # Log Message =========================================================================
+        last_graph_update_time, log_message = self._setup_logging(is_training)
+        #======================================================================================
+
+        # Create instance of the environment and agent ========================================
+        env = gym.make("LunarLander-v3", render_mode="human" if render else "rgb_array")
+        #======================================================================================
+
+        # Setup training value or load best model =============================================
+        policy_dqn, target_dqn, memory, epsilon, epsilon_history, step_count, best_reward = \
+        self._setup_training(is_training, env)
         #======================================================================================
 
         # Train INDEFINITELY ==================================================================
         rewards_per_episode = []
         action_counts = [0,0,0,0]
+
         for episode in itertools.count():
 
-            state, _ = env.reset()  # Initialize environment. Reset returns (state,info).
-            state = torch.tensor(state, dtype=torch.float, device=device) # Convert state to tensor directly on device
-
-            terminated = False      # True when agent reaches goal or fails
-            episode_reward = 0.0    # Used to accumulate rewards per episode
-
-            # Perform actions until episode terminates or reaches max rewards
-            # (on some envs, it is possible for the agent to train to a point where it NEVER terminates, so stop on reward is necessary)
-            max_steps = 1000
-            steps = 0
-            while(not terminated and steps < max_steps):
-                steps += 1
-
-                # Select action based on epsilon-greedy
-                if is_training and (random.random() < epsilon or episode < 100):
-                    # select random action
-                    action = env.action_space.sample()
-                    action = torch.tensor(action, dtype=torch.int64, device=device)
-                else:
-                    # select best action
-                    with torch.no_grad():
-                        action = policy_dqn(state.unsqueeze(dim=0)).squeeze().argmax()
-
-                # Execute action. Truncated and info is not used.
-                new_state,reward,terminated,_,_ = env.step(action.item())
-
-                # Accumulate rewards
-                episode_reward += reward
-
-                # Convert new state and reward to tensors on device
-                new_state = torch.tensor(new_state, dtype=torch.float, device=device)
-                reward = torch.tensor(reward, dtype=torch.float, device=device)
-
-                if is_training:
-                    # Save experience into memory
-                    memory.append((state, action, new_state, reward, terminated))
-
-                    # Increment step counter
-                    step_count+=1
-
-                # Move to the next state
-                state = new_state
-
-                action_counts[action.item()] += 1
-                print("episode : {} ----- action : {}".format(episode, action_counts))
-                if steps >= max_steps:
-                    terminated = True
-
+            episode_reward, step_count = self._run_episode(env, is_training, episode, policy_dqn,
+                memory, epsilon, action_counts, step_count)
 
             # Keep track of the rewards collected per episode.
             rewards_per_episode.append(episode_reward)
 
-            # Save model when new best reward is obtained.
-            if is_training:
-                if episode_reward > best_reward:
-                    log_message = f"{datetime.now().strftime(DATE_FORMAT)}: New best reward {episode_reward:0.1f} ({(episode_reward-best_reward)/best_reward*100:+.1f}%) at episode {episode}, saving model..."
-                    print(log_message)
-                    with open(self.LOG_FILE, 'a') as file:
-                        file.write(log_message + '\n')
-
-                    torch.save(policy_dqn.state_dict(), self.MODEL_FILE)
-                    best_reward = episode_reward
-
-
-                # Update graph every x seconds
-                current_time = datetime.now()
-                if current_time - last_graph_update_time > timedelta(seconds=10):
-                    self.save_graph(rewards_per_episode, epsilon_history)
-                    last_graph_update_time = current_time
-
-                # If enough experience has been collected
-                if len(memory)>self.mini_batch_size:
-                    mini_batch = memory.sample(self.mini_batch_size)
-                    self.optimize(mini_batch, policy_dqn, target_dqn)
-
-                    # Decay epsilon
-                    epsilon = max(epsilon * self.epsilon_decay, self.epsilon_min)
-                    epsilon_history.append(epsilon)
-
-                    # Copy policy network to target network after a certain number of steps
-                    if step_count > self.network_sync_rate:
-                        target_dqn.load_state_dict(policy_dqn.state_dict())
-                        step_count=0
-        #======================================================================================
+            # Update best model ===============================================================
+            best_reward, epsilon, step_count, last_graph_update_time = self._training_update(
+                is_training, episode, episode_reward, best_reward, rewards_per_episode,
+                epsilon_history, memory, policy_dqn, target_dqn,
+                epsilon, step_count, last_graph_update_time, log_message
+            )
+            #===================================================================================
+        #=======================================================================================
 
 
     # Plot Function ===========================================================================
