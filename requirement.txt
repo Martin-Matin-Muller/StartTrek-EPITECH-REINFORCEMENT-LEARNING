@@ -1,3 +1,5 @@
 gymnasium
 torch
 gymnasium[box2d]
+matplotlib
+pyyaml
