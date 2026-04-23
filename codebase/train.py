@@ -37,9 +37,10 @@ print('Number of Actions :',number_action)
      
 learning_rate=5e-4
 minibatch_size=200
+interpolation_parameter=1e-3
+
 discount_factor=0.99
 replay_buffer_size=int(1e5)
-interpolation_parameter=1e-3
      
 class ReplayMemory(object):
   def __init__(self,capacity):
@@ -81,7 +82,7 @@ class Agent():
     self.t_step=(self.t_step + 1) % 4
     if self.t_step==0:
       if len(self.memory.memory)>minibatch_size:
-        experiences=self.memory.sample(100)
+        experiences=self.memory.sample(minibatch_size)
         self.learn(experiences,discount_factor)
 
   #act() --> choose action based on action policy
@@ -119,6 +120,7 @@ agent = Agent(state_size,number_action)
 
 number_episodes=2000
 maximum_number_timesteps_per_episode=1000
+
 epsilon_starting_value=1.0
 epsilon_ending_value=0.01
 epsilon_decay_value=0.995
