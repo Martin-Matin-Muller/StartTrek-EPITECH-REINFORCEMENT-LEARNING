@@ -2,6 +2,10 @@ import os
 import torch
 import gymnasium as gym
 import numpy as np
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+import pandas as pd
 from dqn import DQN  # IMPORTANT
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
@@ -71,3 +75,36 @@ if __name__ == '__main__':
     print("\n=== RESULTS ===")
     for model_name, metrics in results.items():
         print(model_name, metrics)
+
+
+    model_names = list(results.keys())
+
+    means = [results[m]["mean"] for m in model_names]
+    stds = [results[m]["std"] for m in model_names]
+    success_rates = [results[m]["success_rate"] for m in model_names]
+    plt.figure(figsize=(15, 5))
+
+    # Mean reward
+    plt.subplot(1, 3, 1)
+    plt.bar(model_names, means)
+    plt.title("Mean Reward")
+    plt.xticks(rotation=45)
+
+    # Std deviation
+    plt.subplot(1, 3, 2)
+    plt.bar(model_names, stds)
+    plt.title("Std Dev")
+    plt.xticks(rotation=45)
+
+    # Success rate
+    plt.subplot(1, 3, 3)
+    plt.bar(model_names, success_rates)
+    plt.title("Success Rate")
+    plt.xticks(rotation=45)
+
+    plt.tight_layout()
+    plt.savefig("runs/comparison.png")
+    plt.close()
+
+    df = pd.DataFrame(results).T
+    df.to_csv("runs/results.csv")
