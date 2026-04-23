@@ -10,8 +10,6 @@ LunarLander-v3-1:
   discount_factor_g: 0.99
   stop_on_reward: 200
   fc1_nodes: 128
-  env_make_params:
-    use_lidar: False
   enable_double_dqn: True
   enable_dueling_dqn: True
 
@@ -28,8 +26,6 @@ LunarLander-v3-2:
   discount_factor_g: 0.99
   stop_on_reward: 200
   fc1_nodes: 64
-  env_make_params:
-    use_lidar: False
   enable_double_dqn: True
   enable_dueling_dqn: True
 
@@ -52,9 +48,6 @@ LunarLander-v3-3:
   stop_on_reward: 300   # 
 
   fc1_nodes: 256        # 
-
-  env_make_params:
-    use_lidar: False
 
   enable_double_dqn: True
   enable_dueling_dqn: True

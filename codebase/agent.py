@@ -18,56 +18,52 @@ import itertools
 
 import os
 
+######################### LOG ###########################
 # For printing date and time
 DATE_FORMAT = "%m-%d %H:%M:%S"
-
 # Directory for saving run info
 RUNS_DIR = "runs"
 os.makedirs(RUNS_DIR, exist_ok=True)
-
 # 'Agg': used to generate plots as images and save them to a file instead of rendering to screen
 matplotlib.use('Agg')
-
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
-device = 'cpu' # force cpu, sometimes GPU not always faster than CPU due to overhead of moving data to GPU
+#########################################################
 
 # Deep Q-Learning Agent
 class Agent():
 
     def __init__(self, hyperparameter_set):
+        # Open hyperparameters
         with open('codebase/hyperparameters.yml', 'r') as file:
             all_hyperparameter_sets = yaml.safe_load(file)
             hyperparameters = all_hyperparameter_sets[hyperparameter_set]
-            # print(hyperparameters)
-
         self.hyperparameter_set = hyperparameter_set
 
-        # Hyperparameters (adjustable)
+        # Hyperparameters
         self.env_id             = hyperparameters['env_id']
-        self.learning_rate_a    = hyperparameters['learning_rate_a']        # learning rate (alpha)
-        self.discount_factor_g  = hyperparameters['discount_factor_g']      # discount rate (gamma)
-        self.network_sync_rate  = hyperparameters['network_sync_rate']      # number of steps the agent takes before syncing the policy and target network
-        self.replay_memory_size = hyperparameters['replay_memory_size']     # size of replay memory
-        self.mini_batch_size    = hyperparameters['mini_batch_size']        # size of the training data set sampled from the replay memory
-        self.epsilon_init       = hyperparameters['epsilon_init']           # 1 = 100% random actions
-        self.epsilon_decay      = hyperparameters['epsilon_decay']          # epsilon decay rate
-        self.epsilon_min        = hyperparameters['epsilon_min']            # minimum epsilon value
-        self.stop_on_reward     = hyperparameters['stop_on_reward']         # stop training after reaching this number of rewards
+        self.learning_rate_a    = hyperparameters['learning_rate_a']
+        self.discount_factor_g  = hyperparameters['discount_factor_g']
+        self.network_sync_rate  = hyperparameters['network_sync_rate']
+        self.replay_memory_size = hyperparameters['replay_memory_size']
+        self.mini_batch_size    = hyperparameters['mini_batch_size']
+        self.epsilon_init       = hyperparameters['epsilon_init']
+        self.epsilon_decay      = hyperparameters['epsilon_decay']
+        self.epsilon_min        = hyperparameters['epsilon_min']
+        self.stop_on_reward     = hyperparameters['stop_on_reward'] # to implement
         self.fc1_nodes          = hyperparameters['fc1_nodes']
-        self.env_make_params    = hyperparameters.get('env_make_params',{}) # Get optional environment-specific parameters, default to empty dict
-        self.enable_double_dqn  = hyperparameters['enable_double_dqn']      # double dqn on/off flag
-        self.enable_dueling_dqn = hyperparameters['enable_dueling_dqn']     # dueling dqn on/off flag
-
+        self.enable_double_dqn  = hyperparameters['enable_double_dqn']
+        self.enable_dueling_dqn = hyperparameters['enable_dueling_dqn']
         # Neural Network
-        self.loss_fn = nn.MSELoss()          # NN Loss function. MSE=Mean Squared Error can be swapped to something else.
-        self.optimizer = None                # NN Optimizer. Initialize later.
-
+        self.loss_fn = nn.MSELoss()
+        self.optimizer = None
         # Path to Run info
         self.LOG_FILE   = os.path.join(RUNS_DIR, f'{self.hyperparameter_set}.log')
         self.MODEL_FILE = os.path.join(RUNS_DIR, f'{self.hyperparameter_set}.pt')
         self.GRAPH_FILE = os.path.join(RUNS_DIR, f'{self.hyperparameter_set}.png')
 
     def run(self, is_training=True, render=False):
+
+        # Active Log ==========================================================================
         if is_training:
             start_time = datetime.now()
             last_graph_update_time = start_time
@@ -76,43 +72,22 @@ class Agent():
             print(log_message)
             with open(self.LOG_FILE, 'w') as file:
                 file.write(log_message + '\n')
+        #======================================================================================
 
-        # Create instance of the environment.
-        # Use "**self.env_make_params" to pass in environment-specific parameters from hyperparameters.yml.
-        # env = gym.make(self.env_id, render_mode='human' i
-        # f render else None, **self.env_make_params)
-        #======================================================================================
-        #======================================================================================
-        #======================================================================================
-        #======================================================================================
-        #======================================================================================
-        #======================================================================================
-        #======================================================================================
-        #======================================================================================
-        #======================================================================================
-        #======================================================================================
-        #======================================================================================
-        #======================================================================================
-        # env = gym.make("LunarLander-v3", render_mode="rgb_array")
-        env = gym.make("LunarLander-v3", render_mode="human")
+        # Create instance of the environment and agent ========================================
+        if render:
+            env = gym.make("LunarLander-v3", render_mode="human")
+        else:
+            env = gym.make("LunarLander-v3", render_mode="rgb_array")
 
-        # Number of possible actions
         num_actions = env.action_space.n
-
-        # Get observation space size
-        num_states = env.observation_space.shape[0] # Expecting type: Box(low, high, (shape0,), float64)
-
-        # List to keep track of rewards collected per episode.
-        rewards_per_episode = []
-
-        # Create policy and target network. Number of nodes in the hidden layer can be adjusted.
+        num_states = env.observation_space.shape[0]
         policy_dqn = DQN(num_states, num_actions, self.fc1_nodes, self.enable_dueling_dqn).to(device)
+        #======================================================================================
 
+        # Setup training ressources or load agent =============================================
         if is_training:
-            # Initialize epsilon
             epsilon = self.epsilon_init
-
-            # Initialize replay memory
             memory = ReplayMemory(self.replay_memory_size)
 
             # Create the target network and make it identical to the policy network
@@ -122,22 +97,17 @@ class Agent():
             # Policy network optimizer. "Adam" optimizer can be swapped to something else.
             self.optimizer = torch.optim.Adam(policy_dqn.parameters(), lr=self.learning_rate_a)
 
-            # List to keep track of epsilon decay
             epsilon_history = []
-
-            # Track number of steps taken. Used for syncing policy => target network.
             step_count=0
-
-            # Track best reward
             best_reward = -9999999
         else:
-            # Load learned policy
+            # Load learned policy and switch model to evaluation mode
             policy_dqn.load_state_dict(torch.load(self.MODEL_FILE))
-
-            # switch model to evaluation mode
             policy_dqn.eval()
+        #======================================================================================
 
-        # Train INDEFINITELY, manually stop the run when you are satisfied (or unsatisfied) with the results
+        # Train INDEFINITELY ==================================================================
+        rewards_per_episode = []
         action_counts = [0,0,0,0]
         for episode in itertools.count():
 
@@ -157,48 +127,17 @@ class Agent():
                 # Select action based on epsilon-greedy
                 if is_training and (random.random() < epsilon or episode < 100):
                     # select random action
-                    if random.random() < 0.3:
-                         action = random.choice([1,3])  # favoriser latéraux
-                    else:
-                         action = env.action_space.sample()
+                    action = env.action_space.sample()
                     action = torch.tensor(action, dtype=torch.int64, device=device)
                 else:
                     # select best action
                     with torch.no_grad():
-                        # state.unsqueeze(dim=0): Pytorch expects a batch layer, so add batch dimension i.e. tensor([1, 2, 3]) unsqueezes to tensor([[1, 2, 3]])
-                        # policy_dqn returns tensor([[1], [2], [3]]), so squeeze it to tensor([1, 2, 3]).
-                        # argmax finds the index of the largest element.
                         action = policy_dqn(state.unsqueeze(dim=0)).squeeze().argmax()
 
                 # Execute action. Truncated and info is not used.
-                new_state,reward,terminated,truncated,info = env.step(action.item())
+                new_state,reward,terminated,_,_ = env.step(action.item())
 
                 # Accumulate rewards
-                
-                # # Angle
-                # angle = state[4]
-                # reward -= abs(angle) * 0.05
-                # x_pos = state[0]
-                # reward -= abs(x_pos) * 0.1
-                # y_pos = state[0]
-                # reward -= abs(y_pos) * 0.1
-                
-                # # Do nothing
-                # if action.item() == 0:
-                #     reward -= 0.01
-
-                # # Speed
-                # vx = state[2]
-                # vy = state[3]
-
-                # if abs(vx) < 0.01 and abs(vy) < 0.01:
-                #     hover_counter += 1
-                # else:
-                #     hover_counter = 0
-
-                # if hover_counter > 20:
-                #     reward -= 0.1
-
                 episode_reward += reward
 
                 # Convert new state and reward to tensors on device
@@ -255,8 +194,10 @@ class Agent():
                     if step_count > self.network_sync_rate:
                         target_dqn.load_state_dict(policy_dqn.state_dict())
                         step_count=0
+        #======================================================================================
 
 
+    # Plot Function ===========================================================================
     def save_graph(self, rewards_per_episode, epsilon_history):
         # Save plots
         fig = plt.figure(1)
@@ -281,59 +222,41 @@ class Agent():
         # Save plots
         fig.savefig(self.GRAPH_FILE)
         plt.close(fig)
+    #==========================================================================================
 
-
-    # Optimize policy network
+    # Optimize Function =======================================================================
     def optimize(self, mini_batch, policy_dqn, target_dqn):
-
-        # Transpose the list of experiences and separate each element
         states, actions, new_states, rewards, terminations = zip(*mini_batch)
 
         # Stack tensors to create batch tensors
-        # tensor([[1,2,3]])
         states = torch.stack(states)
-
         actions = torch.stack(actions)
-
         new_states = torch.stack(new_states)
-
         rewards = torch.stack(rewards)
         terminations = torch.tensor(terminations).float().to(device)
 
         with torch.no_grad():
             if self.enable_double_dqn:
                 best_actions_from_policy = policy_dqn(new_states).argmax(dim=1)
-
                 target_q = rewards + (1-terminations) * self.discount_factor_g * \
                                 target_dqn(new_states).gather(dim=1, index=best_actions_from_policy.unsqueeze(dim=1)).squeeze()
             else:
                 # Calculate target Q values (expected returns)
                 target_q = rewards + (1-terminations) * self.discount_factor_g * target_dqn(new_states).max(dim=1)[0]
-                '''
-                    target_dqn(new_states)  ==> tensor([[1,2,3],[4,5,6]])
-                        .max(dim=1)         ==> torch.return_types.max(values=tensor([3,6]), indices=tensor([3, 0, 0, 1]))
-                            [0]             ==> tensor([3,6])
-                '''
 
         # Calcuate Q values from current policy
         current_q = policy_dqn(states).gather(dim=1, index=actions.unsqueeze(dim=1)).squeeze()
-        '''
-            policy_dqn(states)  ==> tensor([[1,2,3],[4,5,6]])
-                actions.unsqueeze(dim=1)
-                .gather(1, actions.unsqueeze(dim=1))  ==>
-                    .squeeze()                    ==>
-        '''
 
         # Compute loss
         loss = self.loss_fn(current_q, target_q)
 
         # Optimize the model (backpropagation)
-        self.optimizer.zero_grad()  # Clear gradients
-        loss.backward()             # Compute gradients
+        self.optimizer.zero_grad()
+        loss.backward()
         self.optimizer.step()       # Update network parameters i.e. weights and biases
+    #==========================================================================================
 
 if __name__ == '__main__':
-    # Parse command line inputs
     parser = argparse.ArgumentParser(description='Train or test model.')
     parser.add_argument('hyperparameters', help='')
     parser.add_argument('--train', help='Training mode', action='store_true')
