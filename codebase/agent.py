@@ -36,6 +36,7 @@ class Agent():
             all_hyperparameter_sets = yaml.safe_load(file)
             hyperparameters = all_hyperparameter_sets[hyperparameter_set]
         self.hyperparameter_set = hyperparameter_set
+        self.hyperparameters = hyperparameters
 
         # Hyperparameters
         self.env_id             = hyperparameters['env_id']
@@ -120,7 +121,10 @@ class Agent():
             with open(self.LOG_FILE, 'a') as file:
                 file.write(log_message + '\n')
 
-            torch.save(policy_dqn.state_dict(), self.MODEL_FILE)
+            torch.save({
+                "model_state_dict": policy_dqn.state_dict(),
+                "hyperparameters": self.hyperparameters,
+            }, self.MODEL_FILE)
 
             best_reward = episode_reward
 
