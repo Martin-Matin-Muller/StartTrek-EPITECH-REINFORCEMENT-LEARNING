@@ -174,6 +174,10 @@ class Agent():
             # ===================== STEP ENV =====================
             new_state, reward, terminated, _, _ = env.step(action.item())
 
+            y = state[1]
+            if y > 1.5:
+                reward -= 0.05
+
             episode_reward += reward
 
             new_state = torch.tensor(new_state, dtype=torch.float, device=device)
@@ -186,11 +190,11 @@ class Agent():
 
             # ===================== STATE UPDATE =====================
             state = new_state
+            action_counts[action.item()] += 1
 
             # ===================== DEBUG =====================
-            action_counts[action.item()] += 1
             print(f"episode : {episode} ----- action : {action_counts} ------ rewards : {episode_reward}")
-
+            # print(f"y : {state[1]}")
             # ===================== END =====================
             if steps >= max_steps:
                 terminated = True
