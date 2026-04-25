@@ -177,34 +177,46 @@ LunarLander-v3-9:
 
 
 
-
-
-
-
-
-
-
-
-
-
-
 LunarLander-v3-x:
   env_id: LunarLander-v3-x
+  mini_batch_size: 64
   replay_memory_size: 100000
-  mini_batch_size: 64   # 
 
-  epsilon_init: 1.0
-  epsilon_decay: 0.999  # 
-  epsilon_min: 0.05
+  epsilon_init: 0.9
+  epsilon_decay: 0.995
+  epsilon_min: 0.01
 
-  network_sync_rate: 1000   # 
-
-  learning_rate_a: 0.0005   # 
+  learning_rate_a: 0.001
   discount_factor_g: 0.99
 
-  stop_on_reward: 300   # 
+  network_sync_rate: 1000
 
-  fc1_nodes: 256        # 
+  fc1_nodes: 64
+
+  stop_on_reward: 300
 
   enable_double_dqn: True
   enable_dueling_dqn: True
+#   mini_batch_size: 256 #
+
+#   epsilon_decay: 0.995  #
+
+#   network_sync_rate: 256   #
+
+#   learning_rate_a: 0.0003   #
+
+#   fc1_nodes: 256        #
+
+# #=================================
+
+#   replay_memory_size: 100000
+
+#   epsilon_init: 1.0
+#   epsilon_min: 0.05
+
+#   discount_factor_g: 0.99
+  
+#   stop_on_reward: 300   #
+  
+#   enable_double_dqn: True
+#   enable_dueling_dqn: True
