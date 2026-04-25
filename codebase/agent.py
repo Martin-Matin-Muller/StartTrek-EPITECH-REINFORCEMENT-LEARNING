@@ -11,6 +11,7 @@ from torch import nn
 import yaml
 
 from experience_replay import ReplayMemory
+from experience_replay import PrioritizedReplayMemory
 from dqn import DQN
 
 from datetime import datetime, timedelta
@@ -22,7 +23,8 @@ import os
 
 # LOG ===================================================
 DATE_FORMAT = "%m-%d %H:%M:%S"              # For printing date and time
-RUNS_DIR = "runs"                           # Directory for saving run info
+RUNS_DIR = "multiple_runs"  #=====================================================TEST
+# RUNS_DIR = "runs"                           # Directory for saving run info
 os.makedirs(RUNS_DIR, exist_ok=True)
 matplotlib.use('Agg') # generate plots as images and save them to a file instead of rendering to screen
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
@@ -32,7 +34,8 @@ class Agent():
 
     def __init__(self, hyperparameter_set):
         # Open hyperparameters
-        with open('codebase/hyperparameters.yml', 'r') as file:
+        # with open('config/hyperparameters.yml', 'r') as file:
+        with open('config/hyperparameters_grid.yml', 'r') as file: #=====================================================TEST
             all_hyperparameter_sets = yaml.safe_load(file)
             hyperparameters = all_hyperparameter_sets[hyperparameter_set]
         self.hyperparameter_set = hyperparameter_set
@@ -79,7 +82,8 @@ class Agent():
 
         if is_training:
             epsilon = self.epsilon_init
-            memory = ReplayMemory(self.replay_memory_size)
+            # memory = ReplayMemory(self.replay_memory_size)
+            memory = PrioritizedReplayMemory(self.replay_memory_size)
             epsilon_history = []
             step_count=0
             best_reward = -9999999
@@ -93,10 +97,16 @@ class Agent():
 
             return policy_dqn, target_dqn, memory, epsilon, epsilon_history, step_count, best_reward
         else:
-            # Load learned policy and switch model to evaluation mode
-            policy_dqn.load_state_dict(torch.load(self.MODEL_FILE))
+            # policy_dqn.load_state_dict(torch.load(self.MODEL_FILE))
+            # policy_dqn.eval()
+
+            checkpoint = torch.load(self.MODEL_FILE, map_location=device)
+            state_dict = checkpoint.get("model_state_dict", checkpoint)
+            policy_dqn.load_state_dict(state_dict)
+            policy_dqn.to(device)
             policy_dqn.eval()
             return policy_dqn, None, None, None, None, None, None
+
 
     def _training_update(self, is_training, episode, episode_reward, best_reward, rewards_per_episode,
                           epsilon_history, memory, policy_dqn, target_dqn, epsilon, step_count,
@@ -136,8 +146,9 @@ class Agent():
 
         # ===================== TRAINING STEP =====================
         if len(memory) > self.mini_batch_size:
-            mini_batch = memory.sample(self.mini_batch_size)
-            self.optimize(mini_batch, policy_dqn, target_dqn)
+            # mini_batch = memory.sample(self.mini_batch_size)
+            mini_batch, indices, weights = memory.sample(self.mini_batch_size)
+            self.optimize(mini_batch, policy_dqn, target_dqn, weights, indices, memory)
 
             epsilon = max(epsilon * self.epsilon_decay, self.epsilon_min)
             epsilon_history.append(epsilon)
@@ -178,10 +189,6 @@ class Agent():
             # ===================== STEP ENV =====================
             new_state, reward, terminated, _, _ = env.step(action.item())
 
-            y = state[1]
-            if y > 1.5:
-                reward -= 0.05
-
             episode_reward += reward
 
             new_state = torch.tensor(new_state, dtype=torch.float, device=device)
@@ -197,7 +204,7 @@ class Agent():
             action_counts[action.item()] += 1
 
             # ===================== DEBUG =====================
-            print(f"episode : {episode} ----- action : {action_counts} ------ rewards : {episode_reward}")
+            # print(f"episode : {episode} ----- action : {action_counts} ------ rewards : {episode_reward}")
             # print(f"y : {state[1]}")
             # ===================== END =====================
             if steps >= max_steps:
@@ -224,12 +231,11 @@ class Agent():
         rewards_per_episode = []
         action_counts = [0,0,0,0]
 
-        for episode in itertools.count():
+        # for episode in itertools.count():
+        for episode in range(1500): #=====================================================TEST
 
             episode_reward, step_count = self._run_episode(env, is_training, episode, policy_dqn,
                 memory, epsilon, action_counts, step_count)
-
-            # Keep track of the rewards collected per episode.
             rewards_per_episode.append(episode_reward)
 
             # Update best model ===============================================================
@@ -270,7 +276,7 @@ class Agent():
     #==========================================================================================
 
     # Optimize Function =======================================================================
-    def optimize(self, mini_batch, policy_dqn, target_dqn):
+    def optimize(self, mini_batch, policy_dqn, target_dqn, weights, indices, memory):
         states, actions, new_states, rewards, terminations = zip(*mini_batch)
 
         # Stack tensors to create batch tensors
@@ -279,6 +285,8 @@ class Agent():
         new_states = torch.stack(new_states)
         rewards = torch.stack(rewards)
         terminations = torch.tensor(terminations).float().to(device)
+
+        weights = torch.tensor(weights, dtype=torch.float32, device=device)
 
         with torch.no_grad():
             if self.enable_double_dqn:
@@ -293,12 +301,17 @@ class Agent():
         current_q = policy_dqn(states).gather(dim=1, index=actions.unsqueeze(dim=1)).squeeze()
 
         # Compute loss
-        loss = self.loss_fn(current_q, target_q)
+        # loss = self.loss_fn(current_q, target_q)
+        td_errors = torch.abs(current_q - target_q).detach()
+        loss = (weights * (current_q - target_q) ** 2).mean()
 
         # Optimize the model (backpropagation)
         self.optimizer.zero_grad()
         loss.backward()
         self.optimizer.step()       # Update network parameters i.e. weights and biases
+
+        td_errors_np = td_errors.cpu().numpy()
+        memory.update_priorities(indices, td_errors_np)
     #==========================================================================================
 
 if __name__ == '__main__':

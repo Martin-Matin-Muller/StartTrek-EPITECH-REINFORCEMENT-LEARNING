@@ -13,19 +13,16 @@ class DQN(nn.Module):
         self.fc2 = nn.Linear(hidden_dim, hidden_dim)
 
         if self.enable_dueling_dqn:
-
-            # Value stream
             self.fc_value = nn.Linear(hidden_dim, hidden_dim)
             self.value = nn.Linear(hidden_dim, 1)
 
-            # Advantage stream
             self.fc_advantage = nn.Linear(hidden_dim, hidden_dim)
             self.advantage = nn.Linear(hidden_dim, action_dim)
-
         else:
             self.output = nn.Linear(hidden_dim, action_dim)
 
     def forward(self, x):
+        # Louis said : "try other"
         x = F.relu(self.fc1(x))
         x = F.relu(self.fc2(x))
 
