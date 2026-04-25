@@ -23,8 +23,8 @@ import os
 
 # LOG ===================================================
 DATE_FORMAT = "%m-%d %H:%M:%S"              # For printing date and time
-RUNS_DIR = "multiple_runs"  #=====================================================TEST
-# RUNS_DIR = "runs"                           # Directory for saving run info
+# RUNS_DIR = "multiple_runs"  #=====================================================TEST
+RUNS_DIR = "runs"                           # Directory for saving run info
 os.makedirs(RUNS_DIR, exist_ok=True)
 matplotlib.use('Agg') # generate plots as images and save them to a file instead of rendering to screen
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
@@ -34,8 +34,8 @@ class Agent():
 
     def __init__(self, hyperparameter_set):
         # Open hyperparameters
-        # with open('config/hyperparameters.yml', 'r') as file:
-        with open('config/hyperparameters_grid.yml', 'r') as file: #=====================================================TEST
+        with open('config/hyperparameters.yml', 'r') as file:
+        # with open('config/hyperparameters_grid.yml', 'r') as file: #=====================================================TEST
             all_hyperparameter_sets = yaml.safe_load(file)
             hyperparameters = all_hyperparameter_sets[hyperparameter_set]
         self.hyperparameter_set = hyperparameter_set
@@ -231,20 +231,27 @@ class Agent():
         rewards_per_episode = []
         action_counts = [0,0,0,0]
 
-        # for episode in itertools.count():
-        for episode in range(1500): #=====================================================TEST
+        try:
+            for episode in itertools.count():
+            # for episode in range(1500): #=====================================================TEST
+            # for episode in range(1): #=====================================================TEST
 
-            episode_reward, step_count = self._run_episode(env, is_training, episode, policy_dqn,
-                memory, epsilon, action_counts, step_count)
-            rewards_per_episode.append(episode_reward)
+                episode_reward, step_count = self._run_episode(env, is_training, episode, policy_dqn,
+                    memory, epsilon, action_counts, step_count)
+                rewards_per_episode.append(episode_reward)
 
-            # Update best model ===============================================================
-            best_reward, epsilon, step_count, last_graph_update_time = self._training_update(
-                is_training, episode, episode_reward, best_reward, rewards_per_episode,
-                epsilon_history, memory, policy_dqn, target_dqn,
-                epsilon, step_count, last_graph_update_time, log_message
-            )
-            #===================================================================================
+                # Update best model ===============================================================
+                best_reward, epsilon, step_count, last_graph_update_time = self._training_update(
+                    is_training, episode, episode_reward, best_reward, rewards_per_episode,
+                    epsilon_history, memory, policy_dqn, target_dqn,
+                    epsilon, step_count, last_graph_update_time, log_message
+                )
+                #===================================================================================
+        except KeyboardInterrupt:
+            torch.save({
+                    "model_state_dict": policy_dqn.state_dict(),
+                    "hyperparameters": self.hyperparameters,
+                }, self.MODEL_FILE)
         #=======================================================================================
 
 
@@ -320,9 +327,11 @@ if __name__ == '__main__':
     parser.add_argument('--train', help='Training mode', action='store_true')
     args = parser.parse_args()
 
+
     dql = Agent(hyperparameter_set=args.hyperparameters)
 
     if args.train:
         dql.run(is_training=True)
     else:
         dql.run(is_training=False, render=True)
+
