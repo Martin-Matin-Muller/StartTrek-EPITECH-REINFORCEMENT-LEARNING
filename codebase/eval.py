@@ -6,7 +6,7 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import pandas as pd
-from dqn import DQN  # IMPORTANT
+from codebase.agent_v1.dqn import DQN  # IMPORTANT
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 

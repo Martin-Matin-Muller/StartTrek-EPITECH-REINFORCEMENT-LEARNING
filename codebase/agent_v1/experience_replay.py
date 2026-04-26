@@ -1,7 +1,7 @@
-# Define memory for Experience Replay
 from collections import deque
 import random
 import numpy as np
+
 class ReplayMemory():
     def __init__(self, maxlen, seed=None):
         self.memory = deque([], maxlen=maxlen)
@@ -18,6 +18,7 @@ class ReplayMemory():
 
     def __len__(self):
         return len(self.memory)
+
 class PrioritizedReplayMemory:
     def __init__(self, capacity, alpha=0.6):
         self.capacity = capacity

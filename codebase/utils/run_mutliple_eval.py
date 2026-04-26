@@ -9,7 +9,7 @@ for config_name in configs.keys():
 
     subprocess.run([
         "python",
-        "codebase/agent.py",
+        "codebase/train.py",
         config_name,
     ], check=True)
 
