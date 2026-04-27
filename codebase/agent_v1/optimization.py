@@ -35,6 +35,7 @@ def optimize(self, mini_batch, policy_dqn, target_dqn, weights, indices, memory)
     self.optimizer.zero_grad()
     loss.backward()
     self.optimizer.step()       # Update network parameters i.e. weights and biases
+    print(f"reward mean={rewards.mean():.2f}, loss={loss.item():.4f}")
 
     td_errors_np = td_errors.cpu().numpy()
     memory.update_priorities(indices, td_errors_np)

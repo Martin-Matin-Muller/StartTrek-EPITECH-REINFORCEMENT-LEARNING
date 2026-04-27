@@ -4,6 +4,7 @@ from agent_v1.log_variable import RUNS_DIR
 
 import gymnasium as gym
 import yaml
+import torch
 import os
 #========================================================
 
@@ -64,19 +65,25 @@ class Agent():
         rewards_per_episode = []
         action_counts = [0,0,0,0]
 
-        for episode in range(self.nb_episode):
+        try:
+            for episode in range(self.nb_episode):
 
-            # Train
-            episode_reward, step_count = self._training(env, is_training, episode, policy_dqn,
-                memory, epsilon, action_counts, step_count)
-            rewards_per_episode.append(episode_reward)
+                # Train
+                episode_reward, step_count = self._training(env, is_training, episode, policy_dqn,
+                    memory, epsilon, action_counts, step_count)
+                rewards_per_episode.append(episode_reward)
 
-            # Update best model
-            best_reward, epsilon, step_count, last_graph_update_time = self._evaluation(
-                is_training, episode, episode_reward, best_reward, rewards_per_episode,
-                epsilon_history, memory, policy_dqn, target_dqn,
-                epsilon, step_count, last_graph_update_time, log_message
-            )
+                # Update best model
+                best_reward, epsilon, step_count, last_graph_update_time = self._evaluation(
+                    is_training, episode, episode_reward, best_reward, rewards_per_episode,
+                    epsilon_history, memory, policy_dqn, target_dqn,
+                    epsilon, step_count, last_graph_update_time, log_message
+                )
+        except KeyboardInterrupt:
+            torch.save({
+                    "model_state_dict": policy_dqn.state_dict(),
+                    "hyperparameters": self.hyperparameters,
+                }, self.MODEL_FILE + "_last")
         #=======================================================================================
 
 
@@ -93,10 +100,3 @@ class Agent():
 
 
 
-
-        # try:
-        # except KeyboardInterrupt:
-        #     torch.save({
-        #             "model_state_dict": policy_dqn.state_dict(),
-        #             "hyperparameters": self.hyperparameters,
-        #         }, self.MODEL_FILE)

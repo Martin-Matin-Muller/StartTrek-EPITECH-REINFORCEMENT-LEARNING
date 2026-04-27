@@ -184,26 +184,33 @@ LunarLander-v3-10:
   enable_dueling_dqn: true
   discount_factor_g: 0.99
   mini_batch_size: 64
-  epsilon_decay: 0.9999
-  learning_rate_a: 0.001
-  network_sync_rate: 500
-  fc1_nodes: 256
-
-LunarLander-v3-11:
-  env_id: LunarLander-v3
-  replay_memory_size: 100000
-  epsilon_init: 0.9
-  epsilon_min: 0.01
-  stop_on_reward: 300
-  enable_double_dqn: true
-  enable_dueling_dqn: true
-  discount_factor_g: 0.99
-  mini_batch_size: 64
   epsilon_decay: 0.99995
   learning_rate_a: 0.001
   network_sync_rate: 500
   fc1_nodes: 256
 
+LunarLander-v3-11:
+  # replay_memory_size: 100000
+  # epsilon_init: 0.9
+  # epsilon_min: 0.01
+  # stop_on_mean_reward: 300
+  # enable_double_dqn: true
+  # enable_dueling_dqn: true
+  # discount_factor_g: 0.99
+  mini_batch_size: 64
+  epsilon_decay: 0.9999
+  learning_rate_a: 0.001
+  network_sync_rate: 500
+  fc1_nodes: 256
+  #seed
+  #enable_wind
+  # wind_power
+  # turbulence_power
+  #enable_gravity
+  #enable_fuel
+  #enable_continuous
+  #activation_function: #Louis (27/04/2026 - 10h32): switch case de batard pas tant que ça en vrai
+  #optimizer: #Louis (27/04/2026 - 10h32): switch case de batard pas tant que ça en vrai
 
 
 
@@ -250,3 +257,50 @@ LunarLander-v3-x:
   
 #   enable_double_dqn: True
 #   enable_dueling_dqn: True
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+LunarLander-x:
+  seed: 42
+  algo:
+    activation_function: relu     #Louis (27/04/2026 - 10h32): switch case de batard pas tant que ça en vrai
+    optimizer: adam                #Louis (27/04/2026 - 10h32): switch case de batard pas tant que ça en vrai
+  env:
+    wind:
+      enable_wind: false
+      wind_power: 0
+      turbulence_power: 0
+    gravity:
+      enable_gravity: false
+    fuel:
+      enable_fuel: false
+    continuous:
+      enable_continuous: false
+  hypers:
+    memory:
+      replay_memory_size: 100000
+      mini_batch_size: 64
+    epsilon:
+      epsilon_init: 0.9
+      epsilon_min: 0.01
+      epsilon_decay: 0.9999
+    stop_on_mean_reward: 300
+    learning_rate_a: 0.001
+    network_sync_rate: 500
+    fc1_nodes: 256
