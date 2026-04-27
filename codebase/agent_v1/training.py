@@ -1,4 +1,4 @@
-from agent_v1.log_variable import device
+from .log_variable import device
 import torch
 import random
 

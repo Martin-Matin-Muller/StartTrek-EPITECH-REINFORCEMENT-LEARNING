@@ -1,4 +1,4 @@
-from agent_v1.log_variable import DATE_FORMAT
+from .log_variable import DATE_FORMAT
 from datetime import datetime, timedelta
 import torch
 

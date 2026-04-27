@@ -1,10 +1,10 @@
-from agent_v1.log_variable import DATE_FORMAT, device
+from .log_variable import DATE_FORMAT, device
 from datetime import datetime
 import torch
 
-from agent_v1.experience_replay import ReplayMemory
-from agent_v1.experience_replay import PrioritizedReplayMemory
-from agent_v1.dqn import DQN
+from .experience_replay import ReplayMemory
+from .experience_replay import PrioritizedReplayMemory
+from .dqn import DQN
 
 #========================================================
 

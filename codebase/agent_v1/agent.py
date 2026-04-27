@@ -1,6 +1,6 @@
 # IMPORT ===================================================
 from torch import nn
-from agent_v1.log_variable import RUNS_DIR
+from .log_variable import RUNS_DIR
 
 import gymnasium as gym
 import yaml
@@ -9,11 +9,11 @@ import os
 #========================================================
 
 class Agent():
-    from agent_v1.evaluation import _evaluation
-    from agent_v1.init_training import _setup_logging, _setup_training
-    from agent_v1.optimization import optimize
-    from agent_v1.plotting import save_graph
-    from agent_v1.training import _training
+    from .evaluation import _evaluation
+    from .init_training import _setup_logging, _setup_training
+    from .optimization import optimize
+    from ..utils.plotting import save_graph
+    from .training import _training
 
     def __init__(self, hyperparameter_set, nb_episode=1):
         # Open hyperparameters
