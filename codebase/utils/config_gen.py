@@ -3,7 +3,6 @@ import yaml
 import copy
 
 base_config = {
-    "env_id": "LunarLander-v3",
     "replay_memory_size": 100000,
     "epsilon_init": 0.9,
     "epsilon_min": 0.01,
@@ -18,7 +17,7 @@ search_space = {
     "epsilon_decay": [0.995, 0.999, 0.9995, 0.9997],
     "learning_rate_a": [1e-4, 3e-4, 1e-3, 5e-4],
     "network_sync_rate": [250, 500, 1000],
-    "fc1_nodes": [64, 128, 256],
+    "fc1_nodes": [8, 16, 32],
 }
 
 all_configs = {}

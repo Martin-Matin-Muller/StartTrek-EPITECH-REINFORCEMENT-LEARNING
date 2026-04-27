@@ -10,6 +10,8 @@ from codebase.agent_v1.dqn import DQN  # IMPORTANT
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
+# NEED REWORK
+
 if __name__ == '__main__':
 
     nb_episode = 100

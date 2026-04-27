@@ -8,20 +8,37 @@ pip install -r requirement.txt
 ```
 
 Create mutliple configs:
-python codebase/utils/config_gen.py 
+```bash
+python3 codebase/utils/config_gen.py 
+```
 
-Run:
-    training (default episode value 1):
-    python3 codebase/train.py model_name --train
+# Usage:
 
-    training (5000 as the number of episode):
-    python3 codebase/train.py model_name --train 5000
+Training (default episode value 1):
+```bash
+python3 -m codebase.train config_name --train
+```
 
-    check one model in action:
-    python3 codebase/train.py model_name
+Training (5000 as the number of episode):
 
-    run multiple train:
-    python3 codebase/run_multiple_train.py
+```bash
+python3 -m codebase.train config_name --train 5000
+```
 
-    check multiple model in action:
-    python3 codebase/run_multiple_eval.py
+See one model in action:
+
+```bash
+python3 -m codebase.train config_name
+```
+
+Run multiple train:
+
+```bash
+python3 codebase/run_multiple_train.py
+```
+
+See multiple model in action:
+
+```bash
+python3 codebase/run_multiple_eval.py
+```

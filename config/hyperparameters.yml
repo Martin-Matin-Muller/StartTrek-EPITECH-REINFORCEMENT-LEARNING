@@ -1,283 +1,9 @@
-# CHANGEMENT : 
-# EVAL : 
-# ANALYSE : 
-# PNG : 
-
-# CHANGEMENT : rien c'est la ref
-# EVAL : ne fait rien sauf vers le début il commence a activé le main engine
-# ANALYSE : peut faire de très bon score si il tombe tout droit et active le main engine
-# PNG : courbe des moyenne assez aléatoire
-LunarLander-v3-1:
-  env_id: LunarLander-v3-v1
-  replay_memory_size: 100000
-  mini_batch_size: 64
-  epsilon_init: 1
-  epsilon_decay: 0.995
-  epsilon_min: 0.05
-  network_sync_rate: 10
-  learning_rate_a: 0.0001
-  discount_factor_g: 0.99
-  stop_on_reward: 200
-  fc1_nodes: 64
-  enable_double_dqn: True
-  enable_dueling_dqn: True
-
-# CHANGEMENT : augmentation du batch_size de 64 à 128
-# EVAL : /
-# ANALYSE : /
-# PNG : plus stable
-LunarLander-v3-2:
-  env_id: LunarLander-v3-v2
-  replay_memory_size: 100000
-  mini_batch_size: 128
-  epsilon_init: 1
-  epsilon_decay: 0.995
-  epsilon_min: 0.05
-  network_sync_rate: 10
-  learning_rate_a: 0.0001
-  discount_factor_g: 0.99
-  stop_on_reward: 200
-  fc1_nodes: 64
-  enable_double_dqn: True
-  enable_dueling_dqn: True
-
-# CHANGEMENT : augmentation du batch_network syncsize de 10 à 1000
-# EVAL : ne fais juste rien
-# ANALYSE : /
-# PNG : moyen
-LunarLander-v3-3:
-  env_id: LunarLander-v3-v3
-  replay_memory_size: 100000
-  mini_batch_size: 128
-  epsilon_init: 1
-  epsilon_decay: 0.995
-  epsilon_min: 0.05
-  network_sync_rate: 1000
-  learning_rate_a: 0.0001
-  discount_factor_g: 0.99
-  stop_on_reward: 200
-  fc1_nodes: 64
-  enable_double_dqn: True
-  enable_dueling_dqn: True
-
-# CHANGEMENT : learning rate 0.0001 to 0.0005
-# EVAL : tombe encore un peu trop vite, active le reacteur trop tard
-# ANALYSE : bien améliorer
-# PNG : moyenne assez haute comparé au autre
-LunarLander-v3-4:
-  env_id: LunarLander-v3-v4
-  replay_memory_size: 100000
-  mini_batch_size: 128
-  epsilon_init: 1
-  epsilon_decay: 0.995
-  epsilon_min: 0.05
-  network_sync_rate: 1000
-  learning_rate_a: 0.0005
-  discount_factor_g: 0.99
-  stop_on_reward: 200
-  fc1_nodes: 64
-  enable_double_dqn: True
-  enable_dueling_dqn: True
-
-# CHANGEMENT : learning rate 0.0005 to 0.001
-# EVAL : utiliser beaucoup le main réacteur
-# ANALYSE : reste en l'air au lieu d'atterir, très lent puisqu'il ne se crash pas
-# PNG : Gros trou un moment mais remonte
-LunarLander-v3-5:
-  env_id: LunarLander-v3-v5
-  replay_memory_size: 100000
-  mini_batch_size: 128
-  epsilon_init: 1
-  epsilon_decay: 0.995
-  epsilon_min: 0.05
-  network_sync_rate: 1000
-  learning_rate_a: 0.001
-  discount_factor_g: 0.99
-  stop_on_reward: 200
-  fc1_nodes: 64
-  enable_double_dqn: True
-  enable_dueling_dqn: True
-
-# CHANGEMENT : learning rate 0.001 to 0.0001 + augmentation de fcnode 64 à 128
-# EVAL : comme la v3, mais active comme même parfois le main engine
-# ANALYSE : /
-# PNG : aléatoir mais a tendance à diminuer
-LunarLander-v3-6:
-  env_id: LunarLander-v3-v6
-  replay_memory_size: 100000
-  mini_batch_size: 128
-  epsilon_init: 1
-  epsilon_decay: 0.995
-  epsilon_min: 0.05
-  network_sync_rate: 1000
-  learning_rate_a: 0.0001
-  discount_factor_g: 0.99
-  stop_on_reward: 200
-  fc1_nodes: 128
-  enable_double_dqn: True
-  enable_dueling_dqn: True
-
-# CHANGEMENT : malus si dépasse le haut de l'écran
-# EVAL : maitrise bien l'atterissage mais pas vers le milieu
-# ANALYSE : /
-# PNG : pas asssez régulier
-LunarLander-v3-7:
-  env_id: LunarLander-v3-v7
-  replay_memory_size: 100000
-  mini_batch_size: 128
-  epsilon_init: 1
-  epsilon_decay: 0.995
-  epsilon_min: 0.05
-  network_sync_rate: 1000
-  learning_rate_a: 0.0001
-  discount_factor_g: 0.99
-  stop_on_reward: 200
-  fc1_nodes: 256
-  enable_double_dqn: True
-  enable_dueling_dqn: True
-
-# CHANGEMENT : malus si dépasse le haut de l'écran
-# EVAL : reste en static en l'air
-# ANALYSE : /
-# PNG : pas asssez régulier
-LunarLander-v3-8:
-  env_id: LunarLander-v3-v8
-  replay_memory_size: 100000
-  mini_batch_size: 128
-  epsilon_init: 1
-  epsilon_decay: 0.995
-  epsilon_min: 0.05
-  network_sync_rate: 1000
-  learning_rate_a: 0.0001
-  discount_factor_g: 0.99
-  stop_on_reward: 200
-  fc1_nodes: 256
-  enable_double_dqn: True
-  enable_dueling_dqn: True
-
-# CHANGEMENT : 
-# EVAL : 
-# ANALYSE : /
-# PNG : 
-LunarLander-v3-9:
-  env_id: LunarLander-v3
-  replay_memory_size: 100000
-  epsilon_init: 0.9
-  epsilon_min: 0.01
-  stop_on_reward: 300
-  enable_double_dqn: true
-  enable_dueling_dqn: true
-  discount_factor_g: 0.99
-  mini_batch_size: 64
-  epsilon_decay: 0.9995
-  learning_rate_a: 0.001
-  network_sync_rate: 500
-  fc1_nodes: 256
-
-LunarLander-v3-10:
-  env_id: LunarLander-v3
-  replay_memory_size: 100000
-  epsilon_init: 0.9
-  epsilon_min: 0.01
-  stop_on_reward: 300
-  enable_double_dqn: true
-  enable_dueling_dqn: true
-  discount_factor_g: 0.99
-  mini_batch_size: 64
-  epsilon_decay: 0.99995
-  learning_rate_a: 0.001
-  network_sync_rate: 500
-  fc1_nodes: 256
-
-LunarLander-v3-11:
-  # replay_memory_size: 100000
-  # epsilon_init: 0.9
-  # epsilon_min: 0.01
-  # stop_on_mean_reward: 300
-  # enable_double_dqn: true
-  # enable_dueling_dqn: true
-  # discount_factor_g: 0.99
-  mini_batch_size: 64
-  epsilon_decay: 0.9999
-  learning_rate_a: 0.001
-  network_sync_rate: 500
-  fc1_nodes: 256
-  #seed
-  #enable_wind
-  # wind_power
-  # turbulence_power
-  #enable_gravity
-  #enable_fuel
-  #enable_continuous
-  #activation_function: #Louis (27/04/2026 - 10h32): switch case de batard pas tant que ça en vrai
-  #optimizer: #Louis (27/04/2026 - 10h32): switch case de batard pas tant que ça en vrai
-
-
-
-LunarLander-v3-x:
-  env_id: LunarLander-v3-x
-  mini_batch_size: 64
-  replay_memory_size: 100000
-
-  epsilon_init: 0.9
-  epsilon_decay: 0.995
-  epsilon_min: 0.01
-
-  learning_rate_a: 0.001
-  discount_factor_g: 0.99
-
-  network_sync_rate: 1000
-
-  fc1_nodes: 64
-
-  stop_on_reward: 300
-
-  enable_double_dqn: True
-  enable_dueling_dqn: True
-#   mini_batch_size: 256 #
-
-#   epsilon_decay: 0.995  #
-
-#   network_sync_rate: 256   #
-
-#   learning_rate_a: 0.0003   #
-
-#   fc1_nodes: 256        #
-
-# #=================================
-
-#   replay_memory_size: 100000
-
-#   epsilon_init: 1.0
-#   epsilon_min: 0.05
-
-#   discount_factor_g: 0.99
-  
-#   stop_on_reward: 300   #
-  
-#   enable_double_dqn: True
-#   enable_dueling_dqn: True
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 LunarLander-x:
+  enable_double_dqn: true
+  enable_dueling_dqn: true
   seed: 42
+  fc1_nodes: 8
+  number_of_layer: 1
   algo:
     activation_function: relu     #Louis (27/04/2026 - 10h32): switch case de batard pas tant que ça en vrai
     optimizer: adam                #Louis (27/04/2026 - 10h32): switch case de batard pas tant que ça en vrai
@@ -287,7 +13,7 @@ LunarLander-x:
       wind_power: 0
       turbulence_power: 0
     gravity:
-      enable_gravity: false
+      gravity: 10.0
     fuel:
       enable_fuel: false
     continuous:
@@ -303,4 +29,249 @@ LunarLander-x:
     stop_on_mean_reward: 300
     learning_rate_a: 0.001
     network_sync_rate: 500
-    fc1_nodes: 256
+
+LunarLander-1:
+  enable_double_dqn: true
+  enable_dueling_dqn: true
+  seed: 42
+  fc1_nodes: 32
+  number_of_layer: 2
+  algo:
+    activation_function: relu     #Louis (27/04/2026 - 10h32): switch case de batard pas tant que ça en vrai
+    optimizer: adam                #Louis (27/04/2026 - 10h32): switch case de batard pas tant que ça en vrai
+  env:
+    wind:
+      enable_wind: false
+      wind_power: 0
+      turbulence_power: 0
+    gravity:
+      gravity: -10.0
+    fuel:
+      enable_fuel: false
+    continuous:
+      enable_continuous: false
+  hypers:
+    memory:
+      replay_memory_size: 100000
+      mini_batch_size: 128
+    epsilon:
+      epsilon_init: 0.9
+      epsilon_min: 0.01
+      epsilon_decay: 0.9995
+    stop_on_mean_reward: 300
+    learning_rate_a: 0.001
+    network_sync_rate: 500
+
+# # CHANGEMENT : 
+# # EVAL : 
+# # ANALYSE : 
+# # PNG : 
+
+# # CHANGEMENT : rien c'est la ref
+# # EVAL : ne fait rien sauf vers le début il commence a activé le main engine
+# # ANALYSE : peut faire de très bon score si il tombe tout droit et active le main engine
+# # PNG : courbe des moyenne assez aléatoire
+# LunarLander-v3-1:
+#   env_id: LunarLander-v3-v1
+#   replay_memory_size: 100000
+#   mini_batch_size: 64
+#   epsilon_init: 1
+#   epsilon_decay: 0.995
+#   epsilon_min: 0.05
+#   network_sync_rate: 10
+#   learning_rate_a: 0.0001
+#   discount_factor_g: 0.99
+#   stop_on_reward: 200
+#   fc1_nodes: 64
+#   enable_double_dqn: True
+#   enable_dueling_dqn: True
+
+# # CHANGEMENT : augmentation du batch_size de 64 à 128
+# # EVAL : /
+# # ANALYSE : /
+# # PNG : plus stable
+# LunarLander-v3-2:
+#   env_id: LunarLander-v3-v2
+#   replay_memory_size: 100000
+#   mini_batch_size: 128
+#   epsilon_init: 1
+#   epsilon_decay: 0.995
+#   epsilon_min: 0.05
+#   network_sync_rate: 10
+#   learning_rate_a: 0.0001
+#   discount_factor_g: 0.99
+#   stop_on_reward: 200
+#   fc1_nodes: 64
+#   enable_double_dqn: True
+#   enable_dueling_dqn: True
+
+# # CHANGEMENT : augmentation du batch_network syncsize de 10 à 1000
+# # EVAL : ne fais juste rien
+# # ANALYSE : /
+# # PNG : moyen
+# LunarLander-v3-3:
+#   env_id: LunarLander-v3-v3
+#   replay_memory_size: 100000
+#   mini_batch_size: 128
+#   epsilon_init: 1
+#   epsilon_decay: 0.995
+#   epsilon_min: 0.05
+#   network_sync_rate: 1000
+#   learning_rate_a: 0.0001
+#   discount_factor_g: 0.99
+#   stop_on_reward: 200
+#   fc1_nodes: 64
+#   enable_double_dqn: True
+#   enable_dueling_dqn: True
+
+# # CHANGEMENT : learning rate 0.0001 to 0.0005
+# # EVAL : tombe encore un peu trop vite, active le reacteur trop tard
+# # ANALYSE : bien améliorer
+# # PNG : moyenne assez haute comparé au autre
+# LunarLander-v3-4:
+#   env_id: LunarLander-v3-v4
+#   replay_memory_size: 100000
+#   mini_batch_size: 128
+#   epsilon_init: 1
+#   epsilon_decay: 0.995
+#   epsilon_min: 0.05
+#   network_sync_rate: 1000
+#   learning_rate_a: 0.0005
+#   discount_factor_g: 0.99
+#   stop_on_reward: 200
+#   fc1_nodes: 64
+#   enable_double_dqn: True
+#   enable_dueling_dqn: True
+
+# # CHANGEMENT : learning rate 0.0005 to 0.001
+# # EVAL : utiliser beaucoup le main réacteur
+# # ANALYSE : reste en l'air au lieu d'atterir, très lent puisqu'il ne se crash pas
+# # PNG : Gros trou un moment mais remonte
+# LunarLander-v3-5:
+#   env_id: LunarLander-v3-v5
+#   replay_memory_size: 100000
+#   mini_batch_size: 128
+#   epsilon_init: 1
+#   epsilon_decay: 0.995
+#   epsilon_min: 0.05
+#   network_sync_rate: 1000
+#   learning_rate_a: 0.001
+#   discount_factor_g: 0.99
+#   stop_on_reward: 200
+#   fc1_nodes: 64
+#   enable_double_dqn: True
+#   enable_dueling_dqn: True
+
+# # CHANGEMENT : learning rate 0.001 to 0.0001 + augmentation de fcnode 64 à 128
+# # EVAL : comme la v3, mais active comme même parfois le main engine
+# # ANALYSE : /
+# # PNG : aléatoir mais a tendance à diminuer
+# LunarLander-v3-6:
+#   env_id: LunarLander-v3-v6
+#   replay_memory_size: 100000
+#   mini_batch_size: 128
+#   epsilon_init: 1
+#   epsilon_decay: 0.995
+#   epsilon_min: 0.05
+#   network_sync_rate: 1000
+#   learning_rate_a: 0.0001
+#   discount_factor_g: 0.99
+#   stop_on_reward: 200
+#   fc1_nodes: 128
+#   enable_double_dqn: True
+#   enable_dueling_dqn: True
+
+# # CHANGEMENT : malus si dépasse le haut de l'écran
+# # EVAL : maitrise bien l'atterissage mais pas vers le milieu
+# # ANALYSE : /
+# # PNG : pas asssez régulier
+# LunarLander-v3-7:
+#   env_id: LunarLander-v3-v7
+#   replay_memory_size: 100000
+#   mini_batch_size: 128
+#   epsilon_init: 1
+#   epsilon_decay: 0.995
+#   epsilon_min: 0.05
+#   network_sync_rate: 1000
+#   learning_rate_a: 0.0001
+#   discount_factor_g: 0.99
+#   stop_on_reward: 200
+#   fc1_nodes: 256
+#   enable_double_dqn: True
+#   enable_dueling_dqn: True
+
+# # CHANGEMENT : malus si dépasse le haut de l'écran
+# # EVAL : reste en static en l'air
+# # ANALYSE : /
+# # PNG : pas asssez régulier
+# LunarLander-v3-8:
+#   env_id: LunarLander-v3-v8
+#   replay_memory_size: 100000
+#   mini_batch_size: 128
+#   epsilon_init: 1
+#   epsilon_decay: 0.995
+#   epsilon_min: 0.05
+#   network_sync_rate: 1000
+#   learning_rate_a: 0.0001
+#   discount_factor_g: 0.99
+#   stop_on_reward: 200
+#   fc1_nodes: 256
+#   enable_double_dqn: True
+#   enable_dueling_dqn: True
+
+# # CHANGEMENT : 
+# # EVAL : 
+# # ANALYSE : /
+# # PNG : 
+# LunarLander-v3-9:
+#   env_id: LunarLander-v3
+#   replay_memory_size: 100000
+#   epsilon_init: 0.9
+#   epsilon_min: 0.01
+#   stop_on_reward: 300
+#   enable_double_dqn: true
+#   enable_dueling_dqn: true
+#   discount_factor_g: 0.99
+#   mini_batch_size: 64
+#   epsilon_decay: 0.9995
+#   learning_rate_a: 0.001
+#   network_sync_rate: 500
+#   fc1_nodes: 256
+
+# LunarLander-v3-10:
+#   env_id: LunarLander-v3
+#   replay_memory_size: 100000
+#   epsilon_init: 0.9
+#   epsilon_min: 0.01
+#   stop_on_reward: 300
+#   enable_double_dqn: true
+#   enable_dueling_dqn: true
+#   discount_factor_g: 0.99
+#   mini_batch_size: 64
+#   epsilon_decay: 0.99995
+#   learning_rate_a: 0.001
+#   network_sync_rate: 500
+#   fc1_nodes: 256
+
+# LunarLander-v3-11:
+#   # replay_memory_size: 100000
+#   # epsilon_init: 0.9
+#   # epsilon_min: 0.01
+#   # stop_on_mean_reward: 300
+#   # enable_double_dqn: true
+#   # enable_dueling_dqn: true
+#   # discount_factor_g: 0.99
+#   mini_batch_size: 64
+#   epsilon_decay: 0.9999
+#   learning_rate_a: 0.001
+#   network_sync_rate: 500
+#   fc1_nodes: 256
+#   #seed
+#   #enable_wind
+#   # wind_power
+#   # turbulence_power
+#   #enable_gravity
+#   #enable_fuel
+#   #enable_continuous
+#   #activation_function: #Louis (27/04/2026 - 10h32): switch case de batard pas tant que ça en vrai
+#   #optimizer: #Louis (27/04/2026 - 10h32): switch case de batard pas tant que ça en vrai

@@ -1,4 +1,4 @@
-from agent_v1.agent import Agent
+from codebase.basic_agent.agent import Agent
 import argparse
 
 if __name__ == '__main__':
