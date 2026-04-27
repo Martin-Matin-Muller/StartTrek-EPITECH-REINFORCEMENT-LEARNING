@@ -115,37 +115,37 @@ class Agent():
             return best_reward, epsilon, step_count, last_graph_update_time
 
         # ===================== BEST MODEL =====================
-        if episode_reward > best_reward:
-            if best_reward != 0:
-                pct = (episode_reward - best_reward) / abs(best_reward) * 100
-            else:
-                pct = 0.0
-            log_message = (
-                f"{datetime.now().strftime(DATE_FORMAT)}: "
-                f"New best reward {episode_reward:0.1f} "
-                f"({pct:+.1f}%) "
-                f"at episode {episode}, saving model..."
-            )
-            print(log_message)
+        # if episode_reward > best_reward:
+        #     if best_reward != 0:
+        #         pct = (episode_reward - best_reward) / abs(best_reward) * 100
+        #     else:
+        #         pct = 0.0
+        #     log_message = (
+        #         f"{datetime.now().strftime(DATE_FORMAT)}: "
+        #         f"New best reward {episode_reward:0.1f} "
+        #         f"({pct:+.1f}%) "
+        #         f"at episode {episode}, saving model..."
+        #     )
+        #     print(log_message)
 
-            with open(self.LOG_FILE, 'a') as file:
-                file.write(log_message + '\n')
+        #     with open(self.LOG_FILE, 'a') as file:
+        #         file.write(log_message + '\n')
 
-            torch.save({
-                "model_state_dict": policy_dqn.state_dict(),
-                "hyperparameters": self.hyperparameters,
-            }, self.MODEL_FILE)
+        #     torch.save({
+        #         "model_state_dict": policy_dqn.state_dict(),
+        #         "hyperparameters": self.hyperparameters,
+        #     }, self.MODEL_FILE)
 
-            best_reward = episode_reward
+        #     best_reward = episode_reward
 
         # ===================== GRAPH UPDATE =====================
         current_time = datetime.now()
-        if current_time - last_graph_update_time > timedelta(seconds=10):
+        if current_time - last_graph_update_time > timedelta(seconds=60):
             self.save_graph(rewards_per_episode, epsilon_history)
             last_graph_update_time = current_time
 
         # ===================== TRAINING STEP =====================
-        if len(memory) > self.mini_batch_size:
+        if len(memory) > self.mini_batch_size and step_count % 4 == 0:
             # mini_batch = memory.sample(self.mini_batch_size)
             mini_batch, indices, weights = memory.sample(self.mini_batch_size)
             self.optimize(mini_batch, policy_dqn, target_dqn, weights, indices, memory)
@@ -189,6 +189,8 @@ class Agent():
             # ===================== STEP ENV =====================
             new_state, reward, terminated, _, _ = env.step(action.item())
 
+            # reward = np.clip(reward, -1, 1) 
+
             episode_reward += reward
 
             new_state = torch.tensor(new_state, dtype=torch.float, device=device)
@@ -227,14 +229,14 @@ class Agent():
         self._setup_training(is_training, env)
         #======================================================================================
 
-        # Train INDEFINITELY ==================================================================
+        # Train until mean reward > 200 on the last 100 episodes ==================================================================
         rewards_per_episode = []
         action_counts = [0,0,0,0]
+        last_100_episode_mean = -999
+        episode = 0
 
         try:
-            for episode in itertools.count():
-            # for episode in range(1500): #=====================================================TEST
-            # for episode in range(1): #=====================================================TEST
+            while (last_100_episode_mean < 200 and episode < 20000):
 
                 episode_reward, step_count = self._run_episode(env, is_training, episode, policy_dqn,
                     memory, epsilon, action_counts, step_count)
@@ -246,12 +248,26 @@ class Agent():
                     epsilon_history, memory, policy_dqn, target_dqn,
                     epsilon, step_count, last_graph_update_time, log_message
                 )
+                episode += 1
+                if len(rewards_per_episode) >= 100:
+                    last_100_episode_mean = np.mean(rewards_per_episode[-100:])
+
+                if len(rewards_per_episode) >= 100 and episode % 100 == 0:
+                    print(f"Episode {episode} | Mean(100): {last_100_episode_mean:.2f} | epsilon: {epsilon:.2f}")
+
+                if last_100_episode_mean >= 200:
+                    print(f"Solved in {episode} episodes!")
+                    torch.save({
+                        "model_state_dict": policy_dqn.state_dict(),
+                        "hyperparameters": self.hyperparameters,
+                    }, self.MODEL_FILE + "_solved")
+                    break
                 #===================================================================================
         except KeyboardInterrupt:
             torch.save({
                     "model_state_dict": policy_dqn.state_dict(),
                     "hyperparameters": self.hyperparameters,
-                }, self.MODEL_FILE)
+                }, self.MODEL_FILE + "_last")
         #=======================================================================================
 
 
@@ -315,6 +331,7 @@ class Agent():
         # Optimize the model (backpropagation)
         self.optimizer.zero_grad()
         loss.backward()
+        torch.nn.utils.clip_grad_norm_(policy_dqn.parameters(), 1.0)
         self.optimizer.step()       # Update network parameters i.e. weights and biases
 
         td_errors_np = td_errors.cpu().numpy()
