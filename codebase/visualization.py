@@ -1,0 +1,103 @@
+from codebase.DDQN_PER_Dueling_agent.DDQN_PER_Dueling import DDQN_PER_Dueling
+import sys
+import os
+import torch
+import gymnasium as gym
+from codebase.log_variable import RUNS_DIR, device
+from codebase.DDQN_PER_Dueling_agent.dqn import DQN
+
+# def visualize_model(hyperparameter_set, model_file=None, nb_episodes=1, seed=42):
+#     """
+#     Charge le modèle pour le jeu défini par hyperparameter_set et exécute nb_episodes
+#     en render_mode='human'. Si model_file est None, on cherche dans RUNS_DIR:
+#       <hyperparameter_set>.pt, <hyperparameter_set>.pt_last, <hyperparameter_set>.pt_solved
+#     """
+#     dql = DDQN_PER_Dueling(hyperparameter_set=hyperparameter_set, nb_episode=1, seed=seed)
+
+#     model_file = os.path.join(RUNS_DIR, f"{hyperparameter_set}.pt_last")
+#     print(model_file)
+
+#     if model_file is None or not os.path.exists(model_file):
+#         exit(84)
+
+#     checkpoint = torch.load(model_file, map_location=device)
+#     state_dict = checkpoint.get("model_state_dict", checkpoint)
+
+#     env = gym.make(
+#         "LunarLander-v3",
+#         render_mode="human",
+#         continuous=dql.enable_continuous,
+#         gravity=dql.gravity,
+#         enable_wind=dql.enable_wind,
+#         wind_power=dql.wind_power,
+#         turbulence_power=dql.turbulence_power
+#     )
+
+#     num_states = env.observation_space.shape[0]
+#     num_actions = env.action_space.n
+
+#     policy_dqn = DQN(num_states, dql.number_of_layer, num_actions, dql.fc1_nodes).to(device)
+#     policy_dqn.load_state_dict(state_dict)
+#     policy_dqn.eval()
+
+#     for ep in range(nb_episodes):
+#         state, _ = env.reset(seed=seed)
+#         state = torch.tensor(state, dtype=torch.float, device=device)
+#         total_reward = 0.0
+#         terminated = False
+#         truncated = False
+#         steps = 0
+#         while not (terminated or truncated):
+#             with torch.no_grad():
+#                 action = policy_dqn(state.unsqueeze(0)).squeeze().argmax().item()
+#             new_state, reward, terminated, truncated, _ = env.step(action)
+#             total_reward += reward
+#             state = torch.tensor(new_state, dtype=torch.float, device=device)
+#             steps += 1
+#             if steps > 5000:
+#                 break
+#         print(f"Episode {ep + 1} finished, reward: {total_reward}")
+#     env.close()
+
+def visualize_model(hyperparameter_set, model_file=None, nb_episodes=10, seed=42):
+
+    model_file = os.path.join(RUNS_DIR, f"{hyperparameter_set}.pt_last")
+    model = torch.load(model_file, map_location=torch.device("cpu"))
+    model.eval()
+
+    env = gym.make("LunarLander-v3", render_mode="human")
+
+    observation, _ = env.reset(seed=seed)
+    for _ in range(nb_episodes):
+        state = torch.tensor(observation, dtype=torch.float32).unsqueeze(0)
+
+        with torch.no_grad():
+            q_values = model(state)
+
+        action = torch.argmax(q_values, dim=1).item()
+
+        observation, reward, terminated, truncated, _ = env.step(action)
+
+        if terminated or truncated:
+            observation, _ = env.reset()
+    env.close()
+
+if __name__ == '__main__':
+    if len(sys.argv) != 4:
+        print("Not enough argument : python3 -m <model_name> <nb_episode> <seed>")
+        exit(84)
+
+    try:
+        nb_episode = int(sys.argv[2])
+        seed = int(sys.argv[3])
+    except ValueError:
+        print("Usage : python3 -m <model_name> <nb_episode> <seed>")
+        print("<nb_episode> and <seed> must be valid number")
+        exit(84)
+
+    visualize_model(
+        hyperparameter_set=sys.argv[1],
+        model_file=None,
+        nb_episodes=nb_episode if nb_episode > 0 else 10,
+        seed=seed if seed > 0 else 42
+    )

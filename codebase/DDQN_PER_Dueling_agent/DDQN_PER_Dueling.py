@@ -50,7 +50,6 @@ class DDQN_PER_Dueling():
         fuel = envs["fuel"]
         continuous = envs["continuous"]
 
-
         # === Network ===
         self.fc1_nodes = hyperparameters["fc1_nodes"]
         self.number_of_layer = hyperparameters["number_of_layer"]
@@ -174,13 +173,15 @@ class DDQN_PER_Dueling():
 
         return episode_reward, step_count
 
-    def run(self, render=False):
+    def run(self, visualization=False):
         #=====================================================================================
         # Log Message
         last_graph_update_time, log_message = self._setup_logging()
         # Create instance of the environment and agent
-        env = gym.make("LunarLander-v3", render_mode="human" if render else "rgb_array", continuous=self.enable_continuous, gravity=self.gravity,
-               enable_wind=self.enable_wind, wind_power=self.wind_power, turbulence_power=self.turbulence_power)
+        env = gym.make("LunarLander-v3", render_mode="human" if visualization else "rgb_array",
+                        continuous=self.enable_continuous, gravity=self.gravity,
+                        enable_wind=self.enable_wind,
+                        wind_power=self.wind_power, turbulence_power=self.turbulence_power)
         # Setup training value or load best model
         policy_dqn, target_dqn, memory, epsilon, epsilon_history, step_count, best_reward = \
         self._setup_training(env)
