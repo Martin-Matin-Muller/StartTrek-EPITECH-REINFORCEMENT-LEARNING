@@ -15,7 +15,6 @@ def _evaluation(self, is_training, episode, episode_reward, best_reward, rewards
 
     # ===================== TRAINING STEP =====================
     if len(memory) > self.mini_batch_size:
-        # mini_batch = memory.sample(self.mini_batch_size)
         mini_batch, indices, weights = memory.sample(self.mini_batch_size)
         self.optimize(mini_batch, policy_dqn, target_dqn, weights, indices, memory)
 

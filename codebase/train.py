@@ -1,4 +1,4 @@
-from codebase.basic_agent.agent import Agent
+from codebase.DDQN_PER_Dueling_agent.DDQN_PER_Dueling import DDQN_PER_Dueling
 import argparse
 
 if __name__ == '__main__':
@@ -15,7 +15,7 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    dql = Agent(
+    dql = DDQN_PER_Dueling(
         hyperparameter_set=args.hyperparameters,
         nb_episode=args.train or 1
     )

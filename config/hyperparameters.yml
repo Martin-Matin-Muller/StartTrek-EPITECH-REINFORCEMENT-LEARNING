@@ -1,6 +1,4 @@
 LunarLander-x:
-  enable_double_dqn: true
-  enable_dueling_dqn: true
   seed: 42
   fc1_nodes: 8
   number_of_layer: 1
@@ -31,8 +29,6 @@ LunarLander-x:
     network_sync_rate: 500
 
 LunarLander-1:
-  enable_double_dqn: true
-  enable_dueling_dqn: true
   seed: 42
   fc1_nodes: 32
   number_of_layer: 2

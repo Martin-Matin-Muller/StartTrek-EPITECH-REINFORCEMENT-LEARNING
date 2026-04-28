@@ -11,7 +11,7 @@ import random
 import numpy as np
 #========================================================
 
-class Agent():
+class DDQN_PER_Dueling():
     from .evaluation import _evaluation
     from .init_training import _setup_logging, _setup_training
     from .optimization import optimize
@@ -42,15 +42,13 @@ class Agent():
 
 
         # === Network ===
-        self.enable_double_dqn = hyperparameters["enable_double_dqn"]
-        self.enable_dueling_dqn = hyperparameters["enable_dueling_dqn"]
         self.seed = hyperparameters["seed"]
         self.fc1_nodes = hyperparameters["fc1_nodes"]
         self.number_of_layer = hyperparameters["number_of_layer"]
 
         # === Algo ===
         self.activation_function = algo["activation_function"]
-        self.optimizer = algo["optimizer"] # change the name
+        self.optimizer_function = algo["optimizer"] # change the name
 
         # === Env ===
         self.enable_wind = winds["enable_wind"]
@@ -75,10 +73,11 @@ class Agent():
         self.network_sync_rate = hypers["network_sync_rate"]
         self.stop_on_reward    = hypers["stop_on_mean_reward"]
         
-        # Neural Network
+        # === Neural Network ===
         self.loss_fn = nn.MSELoss()
         self.optimizer = None
-        # Path to Run info
+
+        # === Path to Run info ===
         self.LOG_FILE   = os.path.join(RUNS_DIR, f'{self.hyperparameter_set}.log')
         self.MODEL_FILE = os.path.join(RUNS_DIR, f'{self.hyperparameter_set}.pt')
         self.GRAPH_FILE = os.path.join(RUNS_DIR, f'{self.hyperparameter_set}.png')
@@ -96,7 +95,6 @@ class Agent():
 
         # ===================== TRAINING STEP =====================
         if len(memory) > self.mini_batch_size and step_count % 4 == 0:
-            # mini_batch = memory.sample(self.mini_batch_size)
             mini_batch, indices, weights = memory.sample(self.mini_batch_size)
             self.optimize(mini_batch, policy_dqn, target_dqn, weights, indices, memory)
 

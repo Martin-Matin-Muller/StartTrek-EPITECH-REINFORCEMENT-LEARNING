@@ -8,7 +8,7 @@ import os
 import random
 #========================================================
 
-class Agent():
+class PPO():
     from .evaluation import _evaluation
     from .init_training import _setup_logging, _setup_training
     from .optimization import optimize

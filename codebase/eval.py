@@ -7,7 +7,7 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import pandas as pd
-from basic_agent.dqn import DQN
+from DDQN_PER_Dueling_agent.dqn import DQN
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
@@ -42,8 +42,6 @@ if __name__ == '__main__':
                 state_dim=state_dim,
                 number_layer=config["number_of_layer"],
                 action_dim=action_dim,
-                hidden_dim=config["fc1_nodes"],
-                enable_dueling_dqn=config["enable_dueling_dqn"]
             ).to(device)
 
             model.load_state_dict(checkpoint["model_state_dict"])
