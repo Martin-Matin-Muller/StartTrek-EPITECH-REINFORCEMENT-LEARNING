@@ -121,7 +121,7 @@ class DDQN_PER_Dueling():
                      epsilon, action_counts, step_count):
 
         # ===================== RESET VARIABLES =====================
-        state, _ = env.reset(seed=self.seed)
+        state, _ = env.reset()
         state = torch.tensor(state, dtype=torch.float, device=device)
 
         terminated = False
