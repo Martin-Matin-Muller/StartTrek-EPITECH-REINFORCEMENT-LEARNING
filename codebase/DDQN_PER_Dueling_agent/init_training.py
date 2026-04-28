@@ -2,46 +2,46 @@ from ..log_variable import DATE_FORMAT, device
 from datetime import datetime
 import torch
 
-from ..experience_replay import ReplayMemory, PrioritizedReplayMemory
+from ..experience_replay import PrioritizedReplayMemory
 from .dqn import DQN
 
 #========================================================
 
-def _setup_logging(self, is_training):
-    if is_training:
-        start_time = datetime.now()
-        last_graph_update_time = start_time
+def _setup_logging(self):
+    # if is_training:
+    start_time = datetime.now()
+    last_graph_update_time = start_time
 
-        log_message = f"{start_time.strftime(DATE_FORMAT)}: Training starting..."
-        print(log_message)
-        with open(self.LOG_FILE, 'w') as file:
-            file.write(log_message + '\n')
-        return last_graph_update_time, log_message
-    return None, None
+    log_message = f"{start_time.strftime(DATE_FORMAT)}: Training starting..."
+    print(log_message)
+    with open(self.LOG_FILE, 'w') as file:
+        file.write(log_message + '\n')
+    return last_graph_update_time, log_message
+    # return None, None
 
-def _setup_training(self, is_training, env):
+def _setup_training(self, env):
     num_actions = env.action_space.n
     num_states = env.observation_space.shape[0]
     policy_dqn = DQN(num_states, self.number_of_layer, num_actions, self.fc1_nodes).to(device)
 
-    if is_training:
-        epsilon = self.epsilon_init
+    # if is_training:
+    epsilon = self.epsilon_init
 
-        memory = PrioritizedReplayMemory(self.replay_memory_size)
-        epsilon_history = []
-        step_count=0
-        best_reward = -9999999
+    memory = PrioritizedReplayMemory(self.replay_memory_size)
+    epsilon_history = []
+    step_count=0
+    best_reward = -9999999
 
-        target_dqn = DQN(num_states, self.number_of_layer, num_actions, self.fc1_nodes).to(device)
-        target_dqn.load_state_dict(policy_dqn.state_dict())
+    target_dqn = DQN(num_states, self.number_of_layer, num_actions, self.fc1_nodes).to(device)
+    target_dqn.load_state_dict(policy_dqn.state_dict())
 
-        self.optimizer = torch.optim.Adam(policy_dqn.parameters(), lr=self.learning_rate_a)
+    self.optimizer = torch.optim.Adam(policy_dqn.parameters(), lr=self.learning_rate_a)
 
-        return policy_dqn, target_dqn, memory, epsilon, epsilon_history, step_count, best_reward
-    else:
-        checkpoint = torch.load(self.MODEL_FILE, map_location=device)
-        state_dict = checkpoint.get("model_state_dict", checkpoint)
-        policy_dqn.load_state_dict(state_dict)
-        policy_dqn.to(device)
-        policy_dqn.eval()
-        return policy_dqn, None, None, None, None, None, None
+    return policy_dqn, target_dqn, memory, epsilon, epsilon_history, step_count, best_reward
+    # else:
+    #     checkpoint = torch.load(self.MODEL_FILE, map_location=device)
+    #     state_dict = checkpoint.get("model_state_dict", checkpoint)
+    #     policy_dqn.load_state_dict(state_dict)
+    #     policy_dqn.to(device)
+    #     policy_dqn.eval()
+    #     return policy_dqn, None, None, None, None, None, None
