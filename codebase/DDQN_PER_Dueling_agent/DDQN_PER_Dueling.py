@@ -2,7 +2,7 @@
 from torch import nn
 
 from datetime import datetime, timedelta
-from ..log_variable import device, RUNS_DIR, DATE_FORMAT
+from ..log_variable import device, RUNS_DIR, config_path
 import gymnasium as gym
 import yaml
 import torch
@@ -19,13 +19,23 @@ class DDQN_PER_Dueling():
 
     def __init__(self, hyperparameter_set, nb_episode=20000, seed=42):
         # Open hyperparameters
-        with open('config/hyperparameters.yml', 'r') as file:
+        if not os.path.isfile(config_path):
+            print(f"File '{config_path}' not found")
+            exit(84)
+
+        with open(config_path, "r") as file:
             all_hyperparameter_sets = yaml.safe_load(file)
-            hyperparameters = all_hyperparameter_sets[hyperparameter_set]
+
+        if hyperparameter_set not in all_hyperparameter_sets:
+            print(f"Model '{hyperparameter_set}' not found")
+            exit(84)
+
         self.hyperparameter_set = hyperparameter_set
+        hyperparameters = all_hyperparameter_sets[hyperparameter_set]
         self.hyperparameters = hyperparameters
 
-        # Other 
+        # Set hyperparameters
+        # === Other === 
         self.nb_episode = nb_episode
         self.seed = seed
 
