@@ -17,7 +17,7 @@ class DDQN_PER_Dueling():
     from ..utils.plotting import save_graph
     from ..training import _training
 
-    def __init__(self, hyperparameter_set, nb_episode=1):
+    def __init__(self, hyperparameter_set, nb_episode=20000, seed=42):
         # Open hyperparameters
         with open('config/hyperparameters.yml', 'r') as file:
             all_hyperparameter_sets = yaml.safe_load(file)
@@ -27,6 +27,7 @@ class DDQN_PER_Dueling():
 
         # Other 
         self.nb_episode = nb_episode
+        self.seed = seed
 
         # === SHORTCUTS ===
         algo = hyperparameters["algo"]
@@ -41,7 +42,6 @@ class DDQN_PER_Dueling():
 
 
         # === Network ===
-        self.seed = hyperparameters["seed"]
         self.fc1_nodes = hyperparameters["fc1_nodes"]
         self.number_of_layer = hyperparameters["number_of_layer"]
 
@@ -69,7 +69,6 @@ class DDQN_PER_Dueling():
         self.epsilon_min   = epsilon_cfg["epsilon_min"]
 
         self.learning_rate_a   = hypers["learning_rate_a"]
-        self.network_sync_rate = hypers["network_sync_rate"]
         self.stop_on_reward    = hypers["stop_on_mean_reward"]
         
         # === Neural Network ===
@@ -102,7 +101,8 @@ class DDQN_PER_Dueling():
 
             step_count += 1
 
-            if step_count > self.network_sync_rate:
+            network_sync_rate = 200
+            if step_count > network_sync_rate:
                 target_dqn.load_state_dict(policy_dqn.state_dict())
                 step_count = 0
 
@@ -112,7 +112,7 @@ class DDQN_PER_Dueling():
                      epsilon, action_counts, step_count):
 
         # ===================== RESET VARIABLES =====================
-        state, _ = env.reset()
+        state, _ = env.reset(seed=self.seed)
         state = torch.tensor(state, dtype=torch.float, device=device)
 
         terminated = False

@@ -1,5 +1,4 @@
 LunarLander-x:
-  seed: 42
   fc1_nodes: 8
   number_of_layer: 1
   algo:
@@ -26,10 +25,8 @@ LunarLander-x:
       epsilon_decay: 0.9999
     stop_on_mean_reward: 300
     learning_rate_a: 0.001
-    network_sync_rate: 500
 
 LunarLander-1:
-  seed: 42
   fc1_nodes: 32
   number_of_layer: 2
   algo:
@@ -56,7 +53,6 @@ LunarLander-1:
       epsilon_decay: 0.9995
     stop_on_mean_reward: 200
     learning_rate_a: 0.001
-    network_sync_rate: 500
 
 # # CHANGEMENT : 
 # # EVAL : 

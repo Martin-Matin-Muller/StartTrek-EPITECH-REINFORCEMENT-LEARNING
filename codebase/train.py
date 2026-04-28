@@ -7,6 +7,6 @@ if __name__ == '__main__':
     dql = DDQN_PER_Dueling(
         hyperparameter_set=sys.argv[1],
         nb_episode=int(sys.argv[2]) or 20000,
-        #seed=sys.argv[3]
+        seed=int(sys.argv[3])
     )
     dql.run()
