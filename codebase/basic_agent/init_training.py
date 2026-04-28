@@ -27,8 +27,8 @@ def _setup_training(self, is_training, env):
     if is_training:
         epsilon = self.epsilon_init
 
-        # memory = ReplayMemory(self.replay_memory_size, self.seed) 
-        memory = PrioritizedReplayMemory(self.replay_memory_size)
+        memory = ReplayMemory(self.replay_memory_size, self.seed) 
+        # memory = PrioritizedReplayMemory(self.replay_memory_size)
         epsilon_history = []
         step_count=0
         best_reward = -9999999

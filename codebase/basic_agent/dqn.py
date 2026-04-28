@@ -8,14 +8,12 @@ class DQN(nn.Module):
 
         self.enable_dueling_dqn = enable_dueling_dqn
 
-        # ===== Dynamic layers =====
         self.layers = nn.ModuleList()
         self.layers.append(nn.Linear(state_dim, hidden_dim))
 
         for _ in range(number_layer - 1):
             self.layers.append(nn.Linear(hidden_dim, hidden_dim))
 
-        # ===== Heads =====
         if self.enable_dueling_dqn:
             self.fc_value = nn.Linear(hidden_dim, hidden_dim)
             self.value = nn.Linear(hidden_dim, 1)

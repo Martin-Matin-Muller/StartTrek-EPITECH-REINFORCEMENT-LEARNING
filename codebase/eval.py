@@ -1,12 +1,13 @@
 import os
 import torch
 import gymnasium as gym
+from gymnasium.wrappers import RecordVideo
 import numpy as np
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import pandas as pd
-from codebase.agent_v1.dqn import DQN  # IMPORTANT
+from basic_agent.dqn import DQN
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
@@ -19,6 +20,12 @@ if __name__ == '__main__':
 
     env = gym.make("LunarLander-v3", render_mode="rgb_array")
 
+
+    env = RecordVideo(
+        env,
+        video_folder="runs/videos",
+        episode_trigger=lambda e: True  # record every episode # pas faire ça
+    )
     state_dim = env.observation_space.shape[0]
     action_dim = env.action_space.n
 
@@ -32,8 +39,9 @@ if __name__ == '__main__':
             config = checkpoint["hyperparameters"]
 
             model = DQN(
-                state_dim,
-                action_dim,
+                state_dim=state_dim,
+                number_layer=config["number_of_layer"],
+                action_dim=action_dim,
                 hidden_dim=config["fc1_nodes"],
                 enable_dueling_dqn=config["enable_dueling_dqn"]
             ).to(device)
@@ -109,4 +117,13 @@ if __name__ == '__main__':
     plt.close()
 
     df = pd.DataFrame(results).T
+
+    df = df.reset_index()
+    df.columns = ["model", "mean", "std", "success_rate"]
+
+    df['mean'] = df['mean'].apply(lambda x: '{:,.2f}'.format(x))
+    df['std'] = df['std'].apply(lambda x: '{:,.2f}'.format(x))
+    df['success_rate'] = df['success_rate'].apply(lambda x: '{:,.2f}'.format(x))
+
+    df = df.sort_values("mean", ascending=False)
     df.to_csv("runs/results.csv")

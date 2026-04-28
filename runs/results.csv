@@ -1,4 +1,2 @@
-,mean,std,success_rate
-LunarLander-v3-2.pt,-793.9417540489126,471.42148955171365,0.0
-LunarLander-v3-3.pt,-227.64413554777767,97.83726056535401,0.0
-LunarLander-v3-1.pt,-956.3753991842325,1287.6962038495276,0.0
+,model,mean,std,success_rate
+0,LunarLander-1_last.pt,-94.42,20.43,0.00
