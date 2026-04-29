@@ -121,7 +121,7 @@ class DDQN_PER_Dueling():
                      epsilon, action_counts, step_count):
 
         # ===================== RESET VARIABLES =====================
-        state, _ = env.reset(seed=self.seed)
+        state, _ = env.reset()
         state = torch.tensor(state, dtype=torch.float, device=device)
 
         terminated = False
@@ -182,6 +182,7 @@ class DDQN_PER_Dueling():
                         continuous=self.enable_continuous, gravity=self.gravity,
                         enable_wind=self.enable_wind,
                         wind_power=self.wind_power, turbulence_power=self.turbulence_power)
+        env.reset(seed=self.seed)
         # Setup training value or load best model
         policy_dqn, target_dqn, memory, epsilon, epsilon_history, step_count, best_reward = \
         self._setup_training(env)
