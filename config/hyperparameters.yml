@@ -10,7 +10,7 @@ LunarLander-x:
       wind_power: 0
       turbulence_power: 0
     gravity:
-      gravity: 10.0
+      gravity: -10.0
     fuel:
       enable_fuel: false
     continuous:
