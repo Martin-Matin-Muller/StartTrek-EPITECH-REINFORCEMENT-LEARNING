@@ -12,10 +12,11 @@ def optimize(self, mini_batch, policy_dqn, target_dqn, weights, indices, memory)
     terminations = torch.tensor(terminations).float().to(device)
     weights = torch.tensor(weights, dtype=torch.float32, device=device)
 
+    discount_factor = 0.99
     with torch.no_grad():
         best_actions_from_policy = policy_dqn(new_states).argmax(dim=1)
-        target_q = rewards + (1-terminations) * 0.99 * \
-                        target_dqn(new_states).gather(dim=1, index=best_actions_from_policy.unsqueeze(dim=1)).squeeze() # 0.99 stand for discount_factor
+        target_q = rewards + (1-terminations) * discount_factor * \
+                        target_dqn(new_states).gather(dim=1, index=best_actions_from_policy.unsqueeze(dim=1)).squeeze()
 
     # Calcuate Q values from current policy
     current_q = policy_dqn(states).gather(dim=1, index=actions.unsqueeze(dim=1)).squeeze()
