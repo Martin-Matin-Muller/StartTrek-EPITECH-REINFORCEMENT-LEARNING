@@ -2,8 +2,8 @@ from .log_variable import device
 import torch
 import random
 
-def _training(self, env, is_training, episode, policy_dqn, memory,
-                 epsilon, action_counts, step_count):
+def _training(self, env, episode, policy_dqn, memory,
+                    epsilon, action_counts, step_count):
 
     # ===================== RESET VARIABLES =====================
     state, _ = env.reset()
@@ -20,7 +20,7 @@ def _training(self, env, is_training, episode, policy_dqn, memory,
         steps += 1
 
         # ===================== ACTION SELECTION =====================
-        if is_training and (random.random() < epsilon or episode < 100):
+        if random.random() < epsilon or episode < 100:
             action = env.action_space.sample()
             action = torch.tensor(action, dtype=torch.int64, device=device)
         else:
@@ -36,9 +36,8 @@ def _training(self, env, is_training, episode, policy_dqn, memory,
         reward = torch.tensor(reward, dtype=torch.float, device=device)
 
         # ===================== MEMORY =====================
-        if is_training:
-            memory.append((state, action, new_state, reward, terminated))
-            # step_count += 1
+        memory.append((state, action, new_state, reward, terminated))
+        step_count += 1
 
         # ===================== STATE UPDATE =====================
         state = new_state
