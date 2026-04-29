@@ -24,7 +24,6 @@ def _setup_training(self, env):
     num_states = env.observation_space.shape[0]
     policy_dqn = DQN(num_states, self.number_of_layer, num_actions, self.fc1_nodes).to(device)
 
-    # if is_training:
     epsilon = self.epsilon_init
 
     memory = PrioritizedReplayMemory(self.replay_memory_size)
@@ -38,10 +37,3 @@ def _setup_training(self, env):
     self.optimizer = torch.optim.Adam(policy_dqn.parameters(), lr=self.learning_rate_a)
 
     return policy_dqn, target_dqn, memory, epsilon, epsilon_history, step_count, best_reward
-    # else:
-    #     checkpoint = torch.load(self.MODEL_FILE, map_location=device)
-    #     state_dict = checkpoint.get("model_state_dict", checkpoint)
-    #     policy_dqn.load_state_dict(state_dict)
-    #     policy_dqn.to(device)
-    #     policy_dqn.eval()
-    #     return policy_dqn, None, None, None, None, None, None

@@ -6,7 +6,8 @@ def _training(self, env, episode, policy_dqn, memory,
                  epsilon, action_counts, step_count):
     
     # ===================== RESET VARIABLES =====================
-    state, _ = env.reset()
+    # state, _ = env.reset()
+    state, _ = env.reset(seed=self.seed + episode)
     state = torch.tensor(state, dtype=torch.float, device=device)
 
     terminated = False

@@ -99,7 +99,7 @@ class DDQN_PER_Dueling():
             last_graph_update_time = current_time
 
         # ===================== TRAINING STEP =====================
-        if len(memory) > self.mini_batch_size and step_count % 4 == 0:
+        if len(memory) > 4000 and step_count % 4 == 0:
             mini_batch, indices, weights = memory.sample(self.mini_batch_size)
             self.optimize(mini_batch, policy_dqn, target_dqn, weights, indices, memory)
 
@@ -107,9 +107,8 @@ class DDQN_PER_Dueling():
             epsilon_history.append(epsilon)
 
             network_sync_rate = 200
-            if step_count > network_sync_rate:
+            if step_count % network_sync_rate == 0:
                 target_dqn.load_state_dict(policy_dqn.state_dict())
-                step_count = 0
 
         return best_reward, epsilon, step_count, last_graph_update_time
 
@@ -123,6 +122,7 @@ class DDQN_PER_Dueling():
                         enable_wind=self.enable_wind,
                         wind_power=self.wind_power, turbulence_power=self.turbulence_power)
         env.reset(seed=self.seed)
+        env.action_space.seed(self.seed)
         # Setup training value or load best model
         policy_dqn, target_dqn, memory, epsilon, epsilon_history, step_count, best_reward = \
         self._setup_training(env)
