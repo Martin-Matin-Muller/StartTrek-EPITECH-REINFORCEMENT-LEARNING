@@ -38,7 +38,7 @@ def _training(self, env, is_training, episode, policy_dqn, memory,
         # ===================== MEMORY =====================
         if is_training:
             memory.append((state, action, new_state, reward, terminated))
-            step_count += 1
+            # step_count += 1
 
         # ===================== STATE UPDATE =====================
         state = new_state

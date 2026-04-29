@@ -27,6 +27,7 @@ def optimize(self, mini_batch, policy_dqn, target_dqn, weights, indices, memory)
     # Optimize the model (backpropagation)
     self.optimizer.zero_grad()
     loss.backward()
+    torch.nn.utils.clip_grad_norm_(policy_dqn.parameters(), 1.0)
     self.optimizer.step()       # Update network parameters i.e. weights and biases
 
     td_errors_np = td_errors.cpu().numpy()

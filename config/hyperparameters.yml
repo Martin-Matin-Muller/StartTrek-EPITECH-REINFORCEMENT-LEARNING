@@ -106,7 +106,7 @@ LunarLander-3:
     epsilon:
       epsilon_init: 0.9
       epsilon_min: 0.01
-      epsilon_decay: 0.9995
+      epsilon_decay: 0.9998
     stop_on_mean_reward: 200
     learning_rate_a: 0.0005
 

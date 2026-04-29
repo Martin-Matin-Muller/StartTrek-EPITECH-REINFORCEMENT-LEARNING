@@ -39,6 +39,14 @@ class DDQN_PER_Dueling():
         self.nb_episode = nb_episode
         self.seed = seed
 
+        random.seed(self.seed)
+        np.random.seed(self.seed)
+        torch.manual_seed(self.seed)
+
+        if torch.cuda.is_available():
+            torch.cuda.manual_seed(self.seed)
+            torch.cuda.manual_seed_all(self.seed)
+
         # === SHORTCUTS ===
         algo = hyperparameters["algo"]
         hypers = hyperparameters["hypers"]
@@ -108,9 +116,9 @@ class DDQN_PER_Dueling():
             epsilon = max(epsilon * self.epsilon_decay, self.epsilon_min)
             epsilon_history.append(epsilon)
 
-            step_count += 1
+            # step_count += 1
 
-            network_sync_rate = 200
+            network_sync_rate = 1000
             if step_count > network_sync_rate:
                 target_dqn.load_state_dict(policy_dqn.state_dict())
                 step_count = 0
