@@ -2,7 +2,7 @@
 from torch import nn
 
 from datetime import datetime, timedelta
-from ..log_variable import device, RUNS_DIR, config_path
+from ..log_variable import device, RUNS_DIR, config_path, DATE_FORMAT
 import gymnasium as gym
 import yaml
 import torch
@@ -17,50 +17,42 @@ class DDQN_PER_Dueling():
     from ..utils.plotting import save_graph
     from ..training import _training
 
-    def __init__(self, hyperparameter_set, nb_episode=20000, seed=42):
-        # Open hyperparameters
-        if not os.path.isfile(config_path):
-            print(f"File '{config_path}' not found")
-            exit(84)
+    def __init__(self, hyperparameter_set=None, hyperparameters=None, nb_episode=20000, seed=42):
 
-        with open(config_path, "r") as file:
-            all_hyperparameter_sets = yaml.safe_load(file)
+        if hyperparameters is not None:
+            self.hyperparameters = hyperparameters
+            self.hyperparameter_set = "loaded_model"  # optional label
+        else:
+            if not os.path.isfile(config_path):
+                print(f"File '{config_path}' not found")
+                exit(84)
 
-        if hyperparameter_set not in all_hyperparameter_sets:
-            print(f"Model '{hyperparameter_set}' not found")
-            exit(84)
+            with open(config_path, "r") as file:
+                all_hyperparameter_sets = yaml.safe_load(file)
 
-        self.hyperparameter_set = hyperparameter_set
-        hyperparameters = all_hyperparameter_sets[hyperparameter_set]
-        self.hyperparameters = hyperparameters
+            if hyperparameter_set not in all_hyperparameter_sets:
+                print(f"Model '{hyperparameter_set}' not found")
+                exit(84)
 
-        # Set hyperparameters
-        # === Other === 
-        self.nb_episode = nb_episode
-        self.seed = seed
+            self.hyperparameter_set = hyperparameter_set
+            self.hyperparameters = all_hyperparameter_sets[hyperparameter_set]
 
-        random.seed(self.seed)
-        np.random.seed(self.seed)
-        torch.manual_seed(self.seed)
-
-        if torch.cuda.is_available():
-            torch.cuda.manual_seed(self.seed)
-            torch.cuda.manual_seed_all(self.seed)
+        hp = self.hyperparameters
 
         # === SHORTCUTS ===
-        algo = hyperparameters["algo"]
-        hypers = hyperparameters["hypers"]
+        algo = hp["algo"]
+        hypers = hp["hypers"]
         memory = hypers["memory"]
         epsilon_cfg = hypers["epsilon"]
-        envs = hyperparameters["env"]
+        envs = hp["env"]
         winds = envs["wind"]
         gravity = envs["gravity"]
         fuel = envs["fuel"]
         continuous = envs["continuous"]
 
         # === Network ===
-        self.fc1_nodes = hyperparameters["fc1_nodes"]
-        self.number_of_layer = hyperparameters["number_of_layer"]
+        self.fc1_nodes = hp["fc1_nodes"]
+        self.number_of_layer = hp["number_of_layer"]
 
         # === Algo ===
         self.activation_function = algo["activation_function"]
@@ -93,42 +85,30 @@ class DDQN_PER_Dueling():
         self.optimizer = None
 
         # === Path to Run info ===
-        self.LOG_FILE   = os.path.join(RUNS_DIR, f'{self.hyperparameter_set}.log')
-        self.MODEL_FILE = os.path.join(RUNS_DIR, f'{self.hyperparameter_set}.pt')
-        self.GRAPH_FILE = os.path.join(RUNS_DIR, f'{self.hyperparameter_set}.png')
+        self.LOG_FILE   = os.path.join(RUNS_DIR, f'{self.hyperparameter_set}-DDQN-PER-Dueling.log')
+        self.MODEL_FILE = os.path.join(RUNS_DIR, f'{self.hyperparameter_set}-DDQN-PER-Dueling')
+        self.GRAPH_FILE = os.path.join(RUNS_DIR, f'{self.hyperparameter_set}-DDQN-PER-Dueling.png')
 
-    def _training_update(self, episode, episode_reward, best_reward, rewards_per_episode,
-                          epsilon_history, memory, policy_dqn, target_dqn, epsilon, step_count,
-                          last_graph_update_time, log_message):
-        # if not is_training:
-        #     return best_reward, epsilon, step_count, last_graph_update_time
 
+    def _training_update(self, best_reward, rewards_per_episode,
+                      epsilon_history, epsilon, last_graph_update_time):
+
+        # Decay epsilon once per episode
+        epsilon = max(epsilon * self.epsilon_decay, self.epsilon_min)
+        epsilon_history.append(epsilon)
+
+        # Save graph periodically
         current_time = datetime.now()
         if current_time - last_graph_update_time > timedelta(seconds=60):
             self.save_graph(rewards_per_episode, epsilon_history)
             last_graph_update_time = current_time
 
-        # ===================== TRAINING STEP =====================
-        if len(memory) > self.mini_batch_size and step_count % 4 == 0:
-            mini_batch, indices, weights = memory.sample(self.mini_batch_size)
-            self.optimize(mini_batch, policy_dqn, target_dqn, weights, indices, memory)
-
-            epsilon = max(epsilon * self.epsilon_decay, self.epsilon_min)
-            epsilon_history.append(epsilon)
-
-            # step_count += 1
-
-            network_sync_rate = 1000
-            if step_count > network_sync_rate:
-                target_dqn.load_state_dict(policy_dqn.state_dict())
-                step_count = 0
-
-        return best_reward, epsilon, step_count, last_graph_update_time
-
+        return best_reward, epsilon, last_graph_update_time
 
     def run(self, visualization=False):
         #=====================================================================================
         # Log Message
+        log_file = open(self.LOG_FILE, 'w')
         last_graph_update_time, log_message = self._setup_logging()
         # Create instance of the environment and agent
         env = gym.make("LunarLander-v3", render_mode="human" if visualization else "rgb_array",
@@ -136,6 +116,7 @@ class DDQN_PER_Dueling():
                         enable_wind=self.enable_wind,
                         wind_power=self.wind_power, turbulence_power=self.turbulence_power)
         env.reset(seed=self.seed)
+        env.action_space.seed(self.seed)
         # Setup training value or load best model
         policy_dqn, target_dqn, memory, epsilon, epsilon_history, step_count, best_reward = \
         self._setup_training(env)
@@ -151,36 +132,39 @@ class DDQN_PER_Dueling():
         try:
             while (last_100_episode_mean < self.stop_on_reward and episode < self.nb_episode):
 
-                episode_reward, step_count = self._training(env, episode, policy_dqn,
+                episode_reward, step_count = self._training(env, episode, policy_dqn, target_dqn,
                     memory, epsilon, action_counts, step_count)
                 rewards_per_episode.append(episode_reward)
 
                 # Update best model ===============================================================
-                best_reward, epsilon, step_count, last_graph_update_time = self._training_update(
-                    episode, episode_reward, best_reward, rewards_per_episode,
-                    epsilon_history, memory, policy_dqn, target_dqn,
-                    epsilon, step_count, last_graph_update_time, log_message
+                best_reward, epsilon, last_graph_update_time = self._training_update(
+                    best_reward, rewards_per_episode,
+                    epsilon_history,
+                    epsilon, last_graph_update_time
                 )
                 episode += 1
                 if len(rewards_per_episode) >= 100:
                     last_100_episode_mean = np.mean(rewards_per_episode[-100:])
 
                 if len(rewards_per_episode) >= 100 and episode % 100 == 0:
-                    print(f"Episode {episode} | Mean(100): {last_100_episode_mean:.2f} | epsilon: {epsilon:.2f}")
+                    # print(f"{last_graph_update_time.strftime(DATE_FORMAT)}: Episode {episode} | Mean(100): {last_100_episode_mean:.2f} | epsilon: {epsilon:.2f}")
+                    log_message = f"{last_graph_update_time.strftime(DATE_FORMAT)}: Episode {episode} | Mean(100): {last_100_episode_mean:.2f} | epsilon: {epsilon:.2f}"
+                    print(log_message)
+                    log_file.write(log_message + '\n')
 
                 if last_100_episode_mean >= 200:
                     print(f"Solved in {episode} episodes!")
                     torch.save({
                         "model_state_dict": policy_dqn.state_dict(),
                         "hyperparameters": self.hyperparameters,
-                    }, self.MODEL_FILE + "_solved")
+                    }, self.MODEL_FILE + "_solved.pt")
                     break
                 #===================================================================================
         except KeyboardInterrupt:
             torch.save({
                     "model_state_dict": policy_dqn.state_dict(),
                     "hyperparameters": self.hyperparameters,
-                }, self.MODEL_FILE + "_last")
+                }, self.MODEL_FILE + "_last.pt")
         #=======================================================================================
 
 

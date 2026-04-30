@@ -24,7 +24,6 @@ def _setup_training(self, env):
     num_states = env.observation_space.shape[0]
     policy_dqn = DQN(num_states, self.number_of_layer, num_actions, self.fc1_nodes).to(device)
 
-    # if is_training:
     epsilon = self.epsilon_init
 
     memory = PrioritizedReplayMemory(self.replay_memory_size)

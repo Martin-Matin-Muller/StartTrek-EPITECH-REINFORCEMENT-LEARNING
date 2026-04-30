@@ -14,15 +14,10 @@ python3 codebase/utils/config_gen.py
 
 # Usage:
 
-Training (default episode value 1):
-```bash
-python3 -m codebase.train config_name --train
-```
-
-Training (5000 as the number of episode):
+Training (5000 as the number of episode and seed of 42):
 
 ```bash
-python3 -m codebase.train config_name --train 5000
+python3 -m codebase.train config_name 5000 42
 ```
 
 See one model in action:

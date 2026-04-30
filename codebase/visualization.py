@@ -6,11 +6,8 @@ import gymnasium as gym
 from codebase.log_variable import RUNS_DIR, device
 from codebase.DDQN_PER_Dueling_agent.dqn import DQN
 
-def visualize_model(hyperparameter_set, model_file=None, nb_episodes=1, seed=42):
+def visualize_model(model_file=None, nb_episodes=1, seed=42):
 
-    dql = DDQN_PER_Dueling(hyperparameter_set=hyperparameter_set, nb_episode=1, seed=seed)
-
-    model_file = os.path.join(RUNS_DIR, f"{hyperparameter_set}.pt_last")
     print(model_file)
 
     if model_file is None or not os.path.exists(model_file):
@@ -18,6 +15,10 @@ def visualize_model(hyperparameter_set, model_file=None, nb_episodes=1, seed=42)
 
     checkpoint = torch.load(model_file, map_location=device)
     state_dict = checkpoint.get("model_state_dict", checkpoint)
+
+    hyperparameters = checkpoint["hyperparameters"]
+
+    dql = DDQN_PER_Dueling(hyperparameters=hyperparameters, nb_episode=nb_episode, seed=seed)
 
     env = gym.make(
         "LunarLander-v3",
@@ -58,20 +59,19 @@ def visualize_model(hyperparameter_set, model_file=None, nb_episodes=1, seed=42)
 
 if __name__ == '__main__':
     if len(sys.argv) != 4:
-        print("Not enough argument : python3 -m <model_name> <nb_episode> <seed>")
+        print("Not enough argument : python3 -m codebase.visualization <model_name> <nb_episode> <seed>")
         exit(84)
 
     try:
         nb_episode = int(sys.argv[2])
         seed = int(sys.argv[3])
     except ValueError:
-        print("Usage : python3 -m <model_name> <nb_episode> <seed>")
+        print("Usage : python3 -m codebase.visualization <model_name> <nb_episode> <seed>")
         print("<nb_episode> and <seed> must be valid number")
         exit(84)
 
     visualize_model(
-        hyperparameter_set=sys.argv[1],
-        model_file=None,
+        model_file=sys.argv[1],
         nb_episodes=nb_episode if nb_episode > 0 else 10,
         seed=seed if seed > 0 else 42
     )
