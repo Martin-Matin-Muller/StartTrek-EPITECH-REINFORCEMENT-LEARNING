@@ -2,22 +2,30 @@ from collections import deque
 import random
 import numpy as np
 
-class ReplayMemory():
+class ReplayMemory:
     def __init__(self, maxlen, seed=None):
-        self.memory = deque([], maxlen=maxlen)
+        self.maxlen = maxlen
+        self.memory = [None] * maxlen
+        self.position = 0
+        self.size = 0
 
-        # Optional seed for reproducibility
         if seed is not None:
             random.seed(seed)
 
     def append(self, transition):
-        self.memory.append(transition)
+        self.memory[self.position] = transition
+        self.position = (self.position + 1) % self.maxlen
+
+        if self.size < self.maxlen:
+            self.size += 1
 
     def sample(self, sample_size):
-        return random.sample(self.memory, sample_size)
+        if sample_size > self.size:
+            raise ValueError("Sample size cannot exceed current memory size.")
+        return random.sample(self.memory[:self.size], sample_size)
 
     def __len__(self):
-        return len(self.memory)
+        return self.size
 
 class PrioritizedReplayMemory:
     def __init__(self, capacity, alpha=0.6):
@@ -60,7 +68,7 @@ class PrioritizedReplayMemory:
         return samples, indices, np.array(weights, dtype=np.float32)
     
     def update_priorities(self, indices, td_errors):
-        td_errors = np.abs(td_errors) + 1e-5
+        td_errors = np.abs(td_errors) + self.epsilon
         for i, error in zip(indices, td_errors):
             self.priorities[int(i)] = float(error)
 

@@ -35,7 +35,7 @@ class DDQN_PER_Dueling():
         self.hyperparameters = hyperparameters
 
         # Set hyperparameters
-        # === Other === 
+        # === Other ===
         self.nb_episode = nb_episode
         self.seed = seed
 
@@ -64,7 +64,7 @@ class DDQN_PER_Dueling():
 
         # === Algo ===
         self.activation_function = algo["activation_function"]
-        self.optimizer_function = algo["optimizer"] # change the name
+        self.optimizer_function = algo["optimizer"]
 
         # === Env ===
         self.enable_wind = winds["enable_wind"]
@@ -87,7 +87,7 @@ class DDQN_PER_Dueling():
 
         self.learning_rate_a   = hypers["learning_rate_a"]
         self.stop_on_reward    = hypers["stop_on_mean_reward"]
-        
+
         # === Neural Network ===
         self.loss_fn = nn.MSELoss()
         self.optimizer = None
@@ -98,32 +98,29 @@ class DDQN_PER_Dueling():
         self.GRAPH_FILE = os.path.join(RUNS_DIR, f'{self.hyperparameter_set}.png')
 
     def _training_update(self, episode, episode_reward, best_reward, rewards_per_episode,
-                          epsilon_history, memory, policy_dqn, target_dqn, epsilon, step_count,
+                          epsilon_history, memory, policy_dqn, target_dqn, step_count,
                           last_graph_update_time, log_message):
-        # if not is_training:
-        #     return best_reward, epsilon, step_count, last_graph_update_time
 
+        # ===================== GRAPH =====================
         current_time = datetime.now()
         if current_time - last_graph_update_time > timedelta(seconds=60):
             self.save_graph(rewards_per_episode, epsilon_history)
             last_graph_update_time = current_time
 
-        # ===================== TRAINING STEP =====================
-        if len(memory) > self.mini_batch_size and step_count % 4 == 0:
-            mini_batch, indices, weights = memory.sample(self.mini_batch_size)
-            self.optimize(mini_batch, policy_dqn, target_dqn, weights, indices, memory)
+        if episode_reward > best_reward:
+            best_reward = episode_reward
+            torch.save({
+                "model_state_dict": policy_dqn.state_dict(),
+                "hyperparameters": self.hyperparameters,
+            }, self.MODEL_FILE)
+            print(f"New best reward: {best_reward:.2f} — model saved")
 
-            epsilon = max(epsilon * self.epsilon_decay, self.epsilon_min)
-            epsilon_history.append(epsilon)
+        network_sync_rate = 500
+        if step_count > network_sync_rate:
+            target_dqn.load_state_dict(policy_dqn.state_dict())
+            step_count = 0
 
-            # step_count += 1
-
-            network_sync_rate = 1000
-            if step_count > network_sync_rate:
-                target_dqn.load_state_dict(policy_dqn.state_dict())
-                step_count = 0
-
-        return best_reward, epsilon, step_count, last_graph_update_time
+        return best_reward, step_count, last_graph_update_time
 
 
     def run(self, visualization=False):
@@ -143,7 +140,7 @@ class DDQN_PER_Dueling():
 
         # Train variable
         rewards_per_episode = []
-        action_counts = [0,0,0,0]
+        action_counts = [0, 0, 0, 0]
 
         last_100_episode_mean = -999
         episode = 0
@@ -151,22 +148,31 @@ class DDQN_PER_Dueling():
         try:
             while (last_100_episode_mean < self.stop_on_reward and episode < self.nb_episode):
 
-                episode_reward, step_count = self._training(env, episode, policy_dqn,
-                    memory, epsilon, action_counts, step_count)
-                rewards_per_episode.append(episode_reward)
+                beta = min(1.0, 0.4 + episode * (1.0 - 0.4) / self.nb_episode)
 
-                # Update best model ===============================================================
-                best_reward, epsilon, step_count, last_graph_update_time = self._training_update(
+                episode_reward, step_count, epsilon = self._training(env, episode, policy_dqn,
+                    target_dqn, memory, epsilon, action_counts, step_count, beta)
+
+                # epsilon = max(
+                #     epsilon - (self.epsilon_init - self.epsilon_min) / self.epsilon_decay,
+                #     self.epsilon_min
+                # )
+
+                rewards_per_episode.append(episode_reward)
+                epsilon_history.append(epsilon)
+
+                best_reward, step_count, last_graph_update_time = self._training_update(
                     episode, episode_reward, best_reward, rewards_per_episode,
                     epsilon_history, memory, policy_dqn, target_dqn,
-                    epsilon, step_count, last_graph_update_time, log_message
+                    step_count, last_graph_update_time, log_message
                 )
+
                 episode += 1
                 if len(rewards_per_episode) >= 100:
                     last_100_episode_mean = np.mean(rewards_per_episode[-100:])
 
                 if len(rewards_per_episode) >= 100 and episode % 100 == 0:
-                    print(f"Episode {episode} | Mean(100): {last_100_episode_mean:.2f} | epsilon: {epsilon:.2f}")
+                    print(f"Episode {episode} | Mean(100): {last_100_episode_mean:.2f} | epsilon: {epsilon:.4f}")
 
                 if last_100_episode_mean >= 200:
                     print(f"Solved in {episode} episodes!")
@@ -181,19 +187,3 @@ class DDQN_PER_Dueling():
                     "model_state_dict": policy_dqn.state_dict(),
                     "hyperparameters": self.hyperparameters,
                 }, self.MODEL_FILE + "_last")
-        #=======================================================================================
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

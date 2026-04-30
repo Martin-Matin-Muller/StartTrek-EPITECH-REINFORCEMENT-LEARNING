@@ -10,7 +10,7 @@ def visualize_model(hyperparameter_set, model_file=None, nb_episodes=1, seed=42)
 
     dql = DDQN_PER_Dueling(hyperparameter_set=hyperparameter_set, nb_episode=1, seed=seed)
 
-    model_file = os.path.join(RUNS_DIR, f"{hyperparameter_set}.pt_last")
+    model_file = os.path.join(RUNS_DIR, f"{hyperparameter_set}.pt")
     print(model_file)
 
     if model_file is None or not os.path.exists(model_file):

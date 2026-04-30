@@ -1,6 +1,6 @@
 LunarLander-x:
   fc1_nodes: 8
-  number_of_layer: 1
+  number_of_layer: 1 # +2 because input and output 
   algo:
     activation_function: relu     #Louis (27/04/2026 - 10h32): switch case de batard pas tant que ça en vrai
     optimizer: adam                #Louis (27/04/2026 - 10h32): switch case de batard pas tant que ça en vrai
@@ -27,8 +27,36 @@ LunarLander-x:
     learning_rate_a: 0.001
 
 LunarLander-1:
-  fc1_nodes: 32
-  number_of_layer: 2
+  fc1_nodes: 64
+  number_of_layer: 3
+  algo:
+    activation_function: relu
+    optimizer: adam
+  env:
+    wind:
+      enable_wind: false
+      wind_power: 0
+      turbulence_power: 0
+    gravity:
+      gravity: -10.0
+    fuel:
+      enable_fuel: false
+    continuous:
+      enable_continuous: false
+  hypers:
+    memory:
+      replay_memory_size: 50000
+      mini_batch_size: 64
+    epsilon:
+      epsilon_init: 1
+      epsilon_min: 0.1
+      epsilon_decay: 75000
+    stop_on_mean_reward: 200
+    learning_rate_a: 0.0005
+
+LunarLander-1-optimized:
+  fc1_nodes: 64              
+  number_of_layer: 1         
   algo:
     activation_function: relu
     optimizer: adam
@@ -46,13 +74,13 @@ LunarLander-1:
   hypers:
     memory:
       replay_memory_size: 100000
-      mini_batch_size: 128
+      mini_batch_size: 64
     epsilon:
-      epsilon_init: 0.9
+      epsilon_init: 1
       epsilon_min: 0.01
-      epsilon_decay: 0.9995
+      epsilon_decay: 0.9995  
     stop_on_mean_reward: 200
-    learning_rate_a: 0.001
+    learning_rate_a:  0.0005
 
 LunarLander-2:
   fc1_nodes: 16

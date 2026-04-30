@@ -14,7 +14,6 @@ class DQN(nn.Module):
 
         self.fc_value = nn.Linear(hidden_dim, hidden_dim)
         self.value = nn.Linear(hidden_dim, 1)
-
         self.fc_advantage = nn.Linear(hidden_dim, hidden_dim)
         self.advantage = nn.Linear(hidden_dim, action_dim)
 
@@ -24,10 +23,7 @@ class DQN(nn.Module):
 
         v = F.relu(self.fc_value(x))
         V = self.value(v)
-
         a = F.relu(self.fc_advantage(x))
         A = self.advantage(a)
-
         Q = V + (A - A.mean(dim=1, keepdim=True))
-
         return Q

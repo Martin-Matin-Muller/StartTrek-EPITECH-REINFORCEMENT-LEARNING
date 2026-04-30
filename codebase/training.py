@@ -2,8 +2,8 @@ from .log_variable import device
 import torch
 import random
 
-def _training(self, env, episode, policy_dqn, memory,
-                    epsilon, action_counts, step_count):
+def _training(self, env, episode, policy_dqn, target_dqn, memory,
+                    epsilon, action_counts, step_count, beta):
 
     # ===================== RESET VARIABLES =====================
     state, _ = env.reset()
@@ -20,13 +20,14 @@ def _training(self, env, episode, policy_dqn, memory,
         steps += 1
 
         # ===================== ACTION SELECTION =====================
-        if random.random() < epsilon or episode < 100:
+        if random.random() < epsilon:
             action = env.action_space.sample()
             action = torch.tensor(action, dtype=torch.int64, device=device)
         else:
             with torch.no_grad():
                 action = policy_dqn(state.unsqueeze(0)).squeeze().argmax()
 
+        epsilon = max(epsilon - ((self.epsilon_init - self.epsilon_min) / self.epsilon_decay), self.epsilon_min)
         # ===================== STEP ENV =====================
         new_state, reward, terminated, _, _ = env.step(action.item())
 
@@ -43,11 +44,12 @@ def _training(self, env, episode, policy_dqn, memory,
         state = new_state
         action_counts[action.item()] += 1
 
-        # ===================== DEBUG =====================
-        # print(f"episode : {episode} ----- action : {action_counts} ------ rewards : {episode_reward}")
-        # print(f"y : {state[1]}")
-        # ===================== END =====================
+        # ===================== OPTIMIZATION =====================
+        if len(memory) >= self.mini_batch_size:
+            mini_batch, indices, weights = memory.sample(self.mini_batch_size, beta=beta)
+            self.optimize(mini_batch, policy_dqn, target_dqn, weights, indices, memory)
+
         if steps >= max_steps:
             terminated = True
 
-    return episode_reward, step_count
+    return episode_reward, step_count, epsilon
