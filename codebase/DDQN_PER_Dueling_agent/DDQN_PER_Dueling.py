@@ -89,28 +89,21 @@ class DDQN_PER_Dueling():
         self.MODEL_FILE = os.path.join(RUNS_DIR, f'{self.hyperparameter_set}-DDQN-PER-Dueling')
         self.GRAPH_FILE = os.path.join(RUNS_DIR, f'{self.hyperparameter_set}-DDQN-PER-Dueling.png')
 
-    def _training_update(self, best_reward, rewards_per_episode,
-                          epsilon_history, memory, policy_dqn, target_dqn, epsilon, step_count,
-                          last_graph_update_time):
 
+    def _training_update(self, best_reward, rewards_per_episode,
+                      epsilon_history, epsilon, last_graph_update_time):
+
+        # Decay epsilon once per episode
+        epsilon = max(epsilon * self.epsilon_decay, self.epsilon_min)
+        epsilon_history.append(epsilon)
+
+        # Save graph periodically
         current_time = datetime.now()
         if current_time - last_graph_update_time > timedelta(seconds=60):
             self.save_graph(rewards_per_episode, epsilon_history)
             last_graph_update_time = current_time
 
-        # ===================== TRAINING STEP =====================
-        if len(memory) > 4000 and step_count % 4 == 0:
-            mini_batch, indices, weights = memory.sample(self.mini_batch_size)
-            self.optimize(mini_batch, policy_dqn, target_dqn, weights, indices, memory)
-
-            epsilon = max(epsilon * self.epsilon_decay, self.epsilon_min)
-            epsilon_history.append(epsilon)
-
-            network_sync_rate = 200
-            if step_count % network_sync_rate == 0:
-                target_dqn.load_state_dict(policy_dqn.state_dict())
-
-        return best_reward, epsilon, step_count, last_graph_update_time
+        return best_reward, epsilon, last_graph_update_time
 
     def run(self, visualization=False):
         #=====================================================================================
@@ -138,15 +131,15 @@ class DDQN_PER_Dueling():
         try:
             while (last_100_episode_mean < self.stop_on_reward and episode < self.nb_episode):
 
-                episode_reward, step_count = self._training(env, episode, policy_dqn,
+                episode_reward, step_count = self._training(env, episode, policy_dqn, target_dqn,
                     memory, epsilon, action_counts, step_count)
                 rewards_per_episode.append(episode_reward)
 
                 # Update best model ===============================================================
-                best_reward, epsilon, step_count, last_graph_update_time = self._training_update(
+                best_reward, epsilon, last_graph_update_time = self._training_update(
                     best_reward, rewards_per_episode,
-                    epsilon_history, memory, policy_dqn, target_dqn,
-                    epsilon, step_count, last_graph_update_time
+                    epsilon_history,
+                    epsilon, last_graph_update_time
                 )
                 episode += 1
                 if len(rewards_per_episode) >= 100:

@@ -110,6 +110,33 @@ LunarLander-3:
     stop_on_mean_reward: 200
     learning_rate_a: 0.0005
 
+LunarLander-4:
+  fc1_nodes: 64
+  number_of_layer: 3
+  algo:
+    activation_function: relu
+    optimizer: adam
+  env:
+    wind:
+      enable_wind: false
+      wind_power: 0
+      turbulence_power: 0
+    gravity:
+      gravity: -10.0
+    fuel:
+      enable_fuel: false
+    continuous:
+      enable_continuous: false
+  hypers:
+    memory:
+      replay_memory_size: 100000
+      mini_batch_size: 128
+    epsilon:
+      epsilon_init: 1.0
+      epsilon_min: 0.01
+      epsilon_decay: 0.9995
+    stop_on_mean_reward: 200
+    learning_rate_a: 0.0005
 
 # # CHANGEMENT : 
 # # EVAL : 

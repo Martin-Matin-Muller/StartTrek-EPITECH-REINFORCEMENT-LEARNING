@@ -8,9 +8,9 @@ from codebase.DDQN_PER_Dueling_agent.dqn import DQN
 
 def visualize_model(hyperparameter_set, model_file=None, nb_episodes=1, seed=42):
 
-    dql = DDQN_PER_Dueling(hyperparameter_set=hyperparameter_set, nb_episode=1, seed=seed)
+    dql = DDQN_PER_Dueling(hyperparameter_set=hyperparameter_set, nb_episode=nb_episode, seed=seed)
 
-    model_file = os.path.join(RUNS_DIR, f"{hyperparameter_set}.pt_last")
+    # model_file = os.path.join(RUNS_DIR, f"{hyperparameter_set}.pt")
     print(model_file)
 
     if model_file is None or not os.path.exists(model_file):
@@ -57,21 +57,21 @@ def visualize_model(hyperparameter_set, model_file=None, nb_episodes=1, seed=42)
     env.close()
 
 if __name__ == '__main__':
-    if len(sys.argv) != 4:
+    if len(sys.argv) != 5:
         print("Not enough argument : python3 -m <model_name> <nb_episode> <seed>")
         exit(84)
 
     try:
-        nb_episode = int(sys.argv[2])
-        seed = int(sys.argv[3])
+        nb_episode = int(sys.argv[3])
+        seed = int(sys.argv[4])
     except ValueError:
         print("Usage : python3 -m <model_name> <nb_episode> <seed>")
         print("<nb_episode> and <seed> must be valid number")
         exit(84)
 
     visualize_model(
-        hyperparameter_set=sys.argv[1],
-        model_file=None,
+        hyperparameter_set=sys.argv[2],
+        model_file=sys.argv[1],
         nb_episodes=nb_episode if nb_episode > 0 else 10,
         seed=seed if seed > 0 else 42
     )
