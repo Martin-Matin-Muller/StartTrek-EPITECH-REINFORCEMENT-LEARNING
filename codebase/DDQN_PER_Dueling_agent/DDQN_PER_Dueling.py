@@ -37,6 +37,9 @@ class DDQN_PER_Dueling():
             self.hyperparameter_set = hyperparameter_set
             self.hyperparameters = all_hyperparameter_sets[hyperparameter_set]
 
+        self.nb_episode = nb_episode
+        self.seed = seed
+
         hp = self.hyperparameters
 
         # === SHORTCUTS ===
