@@ -21,11 +21,11 @@ if __name__ == '__main__':
     env = gym.make("LunarLander-v3", render_mode="rgb_array")
 
 
-    env = RecordVideo(
-        env,
-        video_folder="runs/videos",
-        episode_trigger=lambda e: True  # record every episode # pas faire ça
-    )
+    # env = RecordVideo(
+    #     env,
+    #     video_folder="runs/videos",
+    #     episode_trigger=lambda e: True  # record every episode # pas faire ça
+    # )
     state_dim = env.observation_space.shape[0]
     action_dim = env.action_space.n
 
