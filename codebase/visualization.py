@@ -18,7 +18,7 @@ def visualize_model(model_file=None, nb_episodes=1, seed=42):
 
     hyperparameters = checkpoint["hyperparameters"]
 
-    dql = DDQN_PER_Dueling(hyperparameters=hyperparameters, nb_episode=nb_episode, seed=seed)
+    dql = DDQN_PER_Dueling(hyperparameters=hyperparameters, nb_episode=nb_episodes, seed=seed)
 
     env = gym.make(
         "LunarLander-v3",
