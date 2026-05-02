@@ -7,33 +7,27 @@ source StartTrekVenv/bin/activate
 pip install -r requirement.txt
 ```
 
-Create mutliple configs:
+Create mutliple configs: need to change config generator
 ```bash
 python3 codebase/utils/config_gen.py 
 ```
 
 # Usage:
 
-Training (5000 as the number of episode and seed of 42):
+Training:
 
 ```bash
-python3 -m codebase.train config_name 5000 42
+python3 -m codebase.train config_name "number of episode" "seed"
 ```
 
 See one model in action:
 
 ```bash
-python3 -m codebase.train config_name
+python3 -m codebase.visualization config_name "number of episode" "seed"
 ```
 
-Run multiple train:
+Evaluate all the models:
 
 ```bash
-python3 codebase/run_multiple_train.py
-```
-
-See multiple model in action:
-
-```bash
-python3 codebase/run_multiple_eval.py
+python3 -m codebase.eval "number of episode" "seed"
 ```

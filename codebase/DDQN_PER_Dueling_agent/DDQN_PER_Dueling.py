@@ -156,7 +156,9 @@ class DDQN_PER_Dueling():
                     log_file.write(log_message + '\n')
 
                 if last_100_episode_mean >= 200:
-                    print(f"Solved in {episode} episodes!")
+                    log_message = f"Solved in {episode} episodes!"
+                    print(log_message)
+                    log_file.write(log_message + '\n')
                     torch.save({
                         "model_state_dict": policy_dqn.state_dict(),
                         "hyperparameters": self.hyperparameters,
