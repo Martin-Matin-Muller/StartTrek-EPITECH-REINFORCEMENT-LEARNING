@@ -1,6 +1,7 @@
 from codebase.AgentRainbowDQN.RainbowDQN import Agent
 import sys
 
+# shell or add an argmument
 if __name__ == '__main__':
     if len(sys.argv) != 4:
         print("Not enough argument : python3 -m codebase.train <model_name> <nb_episode> <seed>")
