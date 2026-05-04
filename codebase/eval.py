@@ -35,7 +35,13 @@ def evaluate_all_models(runs_dir="runs", nb_episode=100, seed=42):
 
         config = checkpoint["hyperparameters"]
 
-        env = gym.make("LunarLander-v3", render_mode="rgb_array") # TODO: add les autre paramètre 
+        env = gym.make("LunarLander-v3",
+                    render_mode="rgb_array",
+                    enable_wind=config["enable_wind"],
+                    wind_power=config["wind_power"],
+                    turbulence_power=config["turbulence_power"],
+                    gravity=config["gravity"]
+        )
 
         model_name = file.replace(".pt", "")
         video_path = os.path.join(runs_dir, "videos", model_name)

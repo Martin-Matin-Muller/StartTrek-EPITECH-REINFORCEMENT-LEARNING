@@ -1,34 +1,123 @@
-05-04 17:57:32: Training starting...
-05-04 17:57:32: Episode 100 | Mean(100): -157.58 | epsilon: 0.61
+05-04 18:49:28: Training starting...
+0:00:27: Episode 100 | Mean(100): -161.72 | epsilon: 0.61
 ==================================================
 Termination stats at episode 100
 ==================================================
 landed               :     2 (  2.00%)
-crash_high_speed     :    10 ( 10.00%)
-crash_bad_angle      :    18 ( 18.00%)
-out_of_bounds        :    60 ( 60.00%)
+crash_high_speed     :    31 ( 31.00%)
+crash_bad_angle      :    27 ( 27.00%)
+out_of_bounds        :    11 ( 11.00%)
 time_limit           :     0 (  0.00%)
-unknown              :    10 ( 10.00%)
+unknown              :    29 ( 29.00%)
 ==================================================
-05-04 17:57:32: Episode 200 | Mean(100): -113.33 | epsilon: 0.37
+0:01:18: Episode 200 | Mean(100): -107.60 | epsilon: 0.37
 ==================================================
 Termination stats at episode 200
 ==================================================
-landed               :     0 (  0.00%)
-crash_high_speed     :     3 (  3.00%)
-crash_bad_angle      :    10 ( 10.00%)
-out_of_bounds        :    66 ( 66.00%)
-time_limit           :     1 (  1.00%)
-unknown              :    20 ( 20.00%)
+landed               :     2 (  2.00%)
+crash_high_speed     :    14 ( 14.00%)
+crash_bad_angle      :    20 ( 20.00%)
+out_of_bounds        :     2 (  2.00%)
+time_limit           :     0 (  0.00%)
+unknown              :    62 ( 62.00%)
 ==================================================
-05-04 18:00:37: Episode 300 | Mean(100): -55.12 | epsilon: 0.22
+0:04:44: Episode 300 | Mean(100): -48.21 | epsilon: 0.22
 ==================================================
 Termination stats at episode 300
 ==================================================
-landed               :     0 (  0.00%)
+landed               :     1 (  1.00%)
 crash_high_speed     :     0 (  0.00%)
-crash_bad_angle      :    11 ( 11.00%)
-out_of_bounds        :    42 ( 42.00%)
-time_limit           :    43 ( 43.00%)
-unknown              :     4 (  4.00%)
+crash_bad_angle      :    14 ( 14.00%)
+out_of_bounds        :     1 (  1.00%)
+time_limit           :    58 ( 58.00%)
+unknown              :    26 ( 26.00%)
 ==================================================
+0:09:29: Episode 400 | Mean(100): -27.14 | epsilon: 0.13
+==================================================
+Termination stats at episode 400
+==================================================
+landed               :     1 (  1.00%)
+crash_high_speed     :     0 (  0.00%)
+crash_bad_angle      :     0 (  0.00%)
+out_of_bounds        :     1 (  1.00%)
+time_limit           :    96 ( 96.00%)
+unknown              :     2 (  2.00%)
+==================================================
+0:14:07: Episode 500 | Mean(100): -8.11 | epsilon: 0.08
+==================================================
+Termination stats at episode 500
+==================================================
+landed               :     3 (  3.00%)
+crash_high_speed     :     0 (  0.00%)
+crash_bad_angle      :     0 (  0.00%)
+out_of_bounds        :     4 (  4.00%)
+time_limit           :    86 ( 86.00%)
+unknown              :     7 (  7.00%)
+==================================================
+0:17:46: Episode 600 | Mean(100): 105.88 | epsilon: 0.05
+==================================================
+Termination stats at episode 600
+==================================================
+landed               :    33 ( 33.00%)
+crash_high_speed     :     0 (  0.00%)
+crash_bad_angle      :     2 (  2.00%)
+out_of_bounds        :     1 (  1.00%)
+time_limit           :    38 ( 38.00%)
+unknown              :    26 ( 26.00%)
+==================================================
+0:19:25: Episode 700 | Mean(100): 193.06 | epsilon: 0.03
+==================================================
+Termination stats at episode 700
+==================================================
+landed               :    63 ( 63.00%)
+crash_high_speed     :     0 (  0.00%)
+crash_bad_angle      :     6 (  6.00%)
+out_of_bounds        :     0 (  0.00%)
+time_limit           :     2 (  2.00%)
+unknown              :    29 ( 29.00%)
+==================================================
+0:20:43: Episode 800 | Mean(100): 226.67 | epsilon: 0.02
+==================================================
+Termination stats at episode 800
+==================================================
+landed               :    61 ( 61.00%)
+crash_high_speed     :     1 (  1.00%)
+crash_bad_angle      :     3 (  3.00%)
+out_of_bounds        :     0 (  0.00%)
+time_limit           :     2 (  2.00%)
+unknown              :    33 ( 33.00%)
+==================================================
+0:21:55: Episode 900 | Mean(100): 243.25 | epsilon: 0.01
+==================================================
+Termination stats at episode 900
+==================================================
+landed               :    68 ( 68.00%)
+crash_high_speed     :     0 (  0.00%)
+crash_bad_angle      :     1 (  1.00%)
+out_of_bounds        :     0 (  0.00%)
+time_limit           :     0 (  0.00%)
+unknown              :    31 ( 31.00%)
+==================================================
+0:23:11: Episode 1000 | Mean(100): 242.22 | epsilon: 0.01
+==================================================
+Termination stats at episode 1000
+==================================================
+landed               :    68 ( 68.00%)
+crash_high_speed     :     0 (  0.00%)
+crash_bad_angle      :     3 (  3.00%)
+out_of_bounds        :     0 (  0.00%)
+time_limit           :     3 (  3.00%)
+unknown              :    26 ( 26.00%)
+==================================================
+0:23:45: Episode 1054 | Mean(100): 250.79 | epsilon: 0.01
+==================================================
+Termination stats at episode 1054
+==================================================
+landed               :    38 ( 70.37%)
+crash_high_speed     :     0 (  0.00%)
+crash_bad_angle      :     1 (  1.85%)
+out_of_bounds        :     0 (  0.00%)
+time_limit           :     1 (  1.85%)
+unknown              :    14 ( 25.93%)
+==================================================
+Solved in 1054 episodes! With a score of 250.78965712280336

@@ -219,7 +219,7 @@ LunarLander-7:
       epsilon_init: 1.0
       epsilon_min: 0.01
       epsilon_decay: 0.995
-    stop_on_mean_reward: 250 # increase stop on higher reward to consolidate teh training
+    stop_on_mean_reward: 250 # increase stop on higher reward to consolidate the training
     learning_rate_a: 0.0005
 
 LunarLander-8:
@@ -241,11 +241,11 @@ LunarLander-8:
       enable_continuous: false
   hypers:
     memory:
-      replay_memory_size: 100000 # decrease memeory size
-      mini_batch_size: 128
+      replay_memory_size: 100000
+      mini_batch_size: 128 # increased
     epsilon:
       epsilon_init: 1.0
       epsilon_min: 0.01
       epsilon_decay: 0.995
-    stop_on_mean_reward: 250 # increase stop on higher reward to consolidate teh training
+    stop_on_mean_reward: 250
     learning_rate_a: 0.0005

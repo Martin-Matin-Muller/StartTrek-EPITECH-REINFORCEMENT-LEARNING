@@ -13,7 +13,6 @@ import torch.optim as optim
 from torch.nn.utils import clip_grad_norm_
 import yaml
 import os
-from datetime import datetime
 from ..log_variable import device, RUNS_DIR, config_path, DATE_FORMAT, max_action
 
 #========================================================
@@ -110,6 +109,15 @@ class AgentRainbowDQN():
         self.LOG_FILE = os.path.join(RUNS_DIR, f'{self.hyperparameter_set}-RainbowDQN.log')
         self.MODEL_FILE = os.path.join(RUNS_DIR, f'{self.hyperparameter_set}-RainbowDQN')
         self.GRAPH_FILE = os.path.join(RUNS_DIR, f'{self.hyperparameter_set}-RainbowDQN.png')
+
+        self.termination_stats = {
+            "landed": 0,
+            "crash_high_speed": 0,
+            "crash_bad_angle": 0,
+            "out_of_bounds": 0,
+            "time_limit": 0,
+            "unknown": 0
+        }
 
     def step(self, state, action, reward, next_state, done):
         self._nstep_buffer.append((state, action, reward, next_state, done))
@@ -279,6 +287,7 @@ class AgentRainbowDQN():
         self._setup_training(env)
         #=====================================================================================
 
+        start_time = datetime.now()
         score = 0.0
         scores = []
         mean_rewards = []
@@ -316,10 +325,19 @@ class AgentRainbowDQN():
                         episode,
                         last_100_episode_mean,
                         eps,
-                        last_graph_update_time
+                        last_graph_update_time,
+                        start_time
                     )
 
                 if last_100_episode_mean >= self.stop_on_reward:
+                    self.log_with_termination_stats(
+                        log_file,
+                        episode,
+                        last_100_episode_mean,
+                        eps,
+                        last_graph_update_time,
+                        start_time
+                    )
                     log_message = f"Solved in {episode} episodes! With a score of {np.mean(mean_rewards[-100:])}"
                     print(log_message)
                     log_file.write(log_message + '\n')

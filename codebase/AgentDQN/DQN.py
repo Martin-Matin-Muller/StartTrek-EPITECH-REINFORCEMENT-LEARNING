@@ -12,7 +12,6 @@ import torch.nn.functional as F
 import torch.optim as optim
 import yaml
 import os
-from datetime import datetime
 from ..log_variable import device, RUNS_DIR, config_path, DATE_FORMAT, max_action
 
 #========================================================
@@ -162,8 +161,6 @@ class AgentDQN():
 
 
 
-
-
     def _setup_logging(self, log_file):
         start_time = datetime.now()
         last_graph_update_time = start_time
@@ -213,6 +210,7 @@ class AgentDQN():
         #=====================================================================================
 
         # Train variable
+        start_time = datetime.now()
         score = 0.0
         mean_rewards = []
         scores = []
@@ -250,10 +248,19 @@ class AgentDQN():
                         episode,
                         last_100_episode_mean,
                         eps,
-                        last_graph_update_time
+                        last_graph_update_time,
+                        start_time
                     )
 
                 if last_100_episode_mean >= self.stop_on_reward:
+                    self.log_with_termination_stats(
+                        log_file,
+                        episode,
+                        last_100_episode_mean,
+                        eps,
+                        last_graph_update_time,
+                        start_time
+                    )
                     log_message = f"Solved in {episode} episodes! With a score of {np.mean(mean_rewards[-100:])}"
                     print(log_message)
                     log_file.write(log_message + '\n')

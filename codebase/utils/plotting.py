@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import os
+from datetime import datetime
 from ..log_variable import DATE_FORMAT 
 
 # Plot Function ===========================================================================
@@ -32,7 +33,7 @@ def save_graph(self, rewards_per_episode, epsilon_history):
 def plot_scores(scores, save_path="scores.png", window=100):
 
     if len(scores) == 0:
-        print("Aucun score à afficher")
+        print("No score to print")
         return
 
     os.makedirs(os.path.dirname(save_path), exist_ok=True) if os.path.dirname(save_path) else None
@@ -50,7 +51,7 @@ def plot_scores(scores, save_path="scores.png", window=100):
         plt.plot(np.arange(len(moving_avg)), moving_avg, color='red',
                  label=f"Average reward ({window})")
     else:
-        print(f"Pas assez de données pour une fenêtre de {window}")
+        print(f"Not enough data for window of {window}")
 
     plt.ylabel('Score')
     plt.xlabel('Episode #')
@@ -58,7 +59,7 @@ def plot_scores(scores, save_path="scores.png", window=100):
     plt.legend()
 
     plt.savefig(save_path)
-    print(f"Graph sauvegardé ici : {save_path}")
+    print(f"Graph saved here : {save_path}")
 
     plt.close()
 
@@ -74,14 +75,14 @@ def classify_termination(self, state, terminated, truncated):
             return "landed"
 
         # Out of bounds
-        if abs(x) > 1.0 or y < 0:
+        if abs(x) > 1.0:
             return "out_of_bounds"
 
-        # Crash - trop rapide
+        # Crash - too fast
         if abs(vy) > 0.5:
             return "crash_high_speed"
 
-        # Crash - mauvais angle
+        # Crash - bad angle
         if abs(angle) > 0.4:
             return "crash_bad_angle"
 
@@ -91,7 +92,7 @@ def update_termination_stats(self, state, terminated, truncated):
     reason = self.classify_termination(state, terminated, truncated)
     self.termination_stats[reason] += 1
 
-def log_with_termination_stats(self, log_file, episode, last_100_episode_mean, eps, last_graph_update_time):
+def log_with_termination_stats(self, log_file, episode, last_100_episode_mean, eps, last_graph_update_time, start_time):
     total = sum(self.termination_stats.values())
 
     header = "=" * 50
@@ -111,8 +112,12 @@ def log_with_termination_stats(self, log_file, episode, last_100_episode_mean, e
 
     lines.append(header)
 
+    elapsed = datetime.now() - start_time
+    elapsed_str = str(elapsed).split('.')[0]  # removes microseconds
+
     log_message = (
-        f"{last_graph_update_time.strftime(DATE_FORMAT)}: "
+        # f"{last_graph_update_time.strftime(DATE_FORMAT)}: "
+        f"{elapsed_str}: "
         f"Episode {episode} | "
         f"Mean(100): {last_100_episode_mean:.2f} | "
         f"epsilon: {eps:.2f}"
