@@ -19,7 +19,7 @@ from ..log_variable import device, RUNS_DIR, config_path, DATE_FORMAT, max_actio
 #========================================================
 
 class Agent():
-    from ..utils.plotting import save_graph
+    from ..utils.plotting import save_graph, plot_scores
 
     def __init__(self, hyperparameter_set=None, hyperparameters=None, nb_episode=20000, seed=42):
 
@@ -308,6 +308,7 @@ class Agent():
                     "model_state_dict": self.qnetwork_local.state_dict(),
                     "hyperparameters": self.hyperparameters,
                 }, self.MODEL_FILE + "_last.pt")
+        self.plot_scores(scores, self.MODEL_FILE + "detail.png")
         return scores
 
 # ─────────────────────────────────────────────────────────────────────────────
