@@ -1,4 +1,4 @@
-from codebase.AgentRainbowDQN.RainbowDQN import Agent
+from codebase.AgentDQN.DQN import Agent
 import sys
 
 if __name__ == '__main__':
