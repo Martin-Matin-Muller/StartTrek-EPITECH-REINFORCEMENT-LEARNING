@@ -9,7 +9,13 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import pandas as pd
 
-from codebase.DDQN_PER_Dueling_agent.dqn import DQN as DDQN_PER_DUELING_network
+from codebase.AgentDQN.model import QNetwork as DQN_Network
+from codebase.AgentDDQN.model import QNetwork as DDQN_Network
+from codebase.AgentDDQN_PER.model import QNetwork as DDQN_PER_Network
+from codebase.AgentDDQN_PER_Dueling.model import QNetwork as DDQN_PER_Dueling_Network
+from codebase.AgentDDQN_PER_Dueling_N_Step.model import QNetwork as DDQN_PER_Dueling_N_Step_Network
+from codebase.AgentDDQN_PER_Dueling_N_Step_Noisy.model import QNetwork as DDQN_PER_Dueling_N_Step_Noisy_Network
+from codebase.AgentRainbowDQN.model import QNetwork as Rainbow_Network
 # import new model when implemented
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -34,13 +40,16 @@ def evaluate_all_models(runs_dir="runs", nb_episode=100, seed=42):
             continue
 
         config = checkpoint["hyperparameters"]
+        env = config["env"]
+        wind = env["wind"]
+        gravity = env["gravity"]
 
         env = gym.make("LunarLander-v3",
                     render_mode="rgb_array",
-                    enable_wind=config["enable_wind"],
-                    wind_power=config["wind_power"],
-                    turbulence_power=config["turbulence_power"],
-                    gravity=config["gravity"]
+                    enable_wind=wind["enable_wind"],
+                    wind_power=wind["wind_power"],
+                    turbulence_power=wind["turbulence_power"],
+                    gravity=gravity["gravity"]
         )
 
         model_name = file.replace(".pt", "")
@@ -58,19 +67,27 @@ def evaluate_all_models(runs_dir="runs", nb_episode=100, seed=42):
         state_dim = env.observation_space.shape[0]
         action_dim = env.action_space.n
 
-        # --- Model selection ---
-        if "DDQN-PER-Dueling" in file:
-            model = DDQN_PER_DUELING_network(
-                state_dim=state_dim,
-                number_layer=config["number_of_layer"],
-                action_dim=action_dim,
-                hidden_dim=config["fc1_nodes"]
-            ).to(device)
-        # Add other option when implemented
-        else:
-            print(f"Skipping unknown model type: {file}")
-            env.close()
-            continue
+        MODEL_MAP = [
+            ("Rainbow", Rainbow_Network),
+            ("DDQN_PER_Dueling_N_Step_Noisy", DDQN_PER_Dueling_N_Step_Noisy_Network),
+            ("DDQN_PER_Dueling_N_Step", DDQN_PER_Dueling_N_Step_Network),
+            ("DDQN_PER_Dueling", DDQN_PER_Dueling_Network),
+            ("DDQN_PER", DDQN_PER_Network),
+            ("DDQN", DDQN_Network),
+            ("DQN", DQN_Network),
+        ]
+
+        model = None
+        for key, ModelClass in MODEL_MAP:
+            if key in file:
+                model = ModelClass(
+                    state_size=state_dim,
+                    action_size=action_dim,
+                    seed=seed,
+                    hidden_layer_neuron=config["fc1_nodes"],
+                    nb_layer=config["number_of_layer"]
+                ).to(device)
+                break
 
         model.load_state_dict(checkpoint["model_state_dict"])
         model.eval()
