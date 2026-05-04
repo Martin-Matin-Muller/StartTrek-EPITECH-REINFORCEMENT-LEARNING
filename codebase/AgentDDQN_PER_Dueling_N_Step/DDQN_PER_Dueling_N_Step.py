@@ -18,7 +18,7 @@ from ..log_variable import device, RUNS_DIR, config_path, DATE_FORMAT, max_actio
 
 #========================================================
 
-class Agent():
+class AgentDDQN_PER_Dueling_N_Step():
     from ..utils.plotting import save_graph, plot_scores
 
     def __init__(self, hyperparameter_set=None, hyperparameters=None, nb_episode=20000, seed=42):
