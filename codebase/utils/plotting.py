@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import os
+from ..log_variable import DATE_FORMAT 
 
 # Plot Function ===========================================================================
 def save_graph(self, rewards_per_episode, epsilon_history):
@@ -47,7 +48,7 @@ def plot_scores(scores, save_path="scores.png", window=100):
     if len(scores) >= window:
         moving_avg = np.convolve(scores, np.ones(window)/window, mode='valid')
         plt.plot(np.arange(len(moving_avg)), moving_avg, color='red',
-                 label=f"Moyenne glissante ({window})")
+                 label=f"Average reward ({window})")
     else:
         print(f"Pas assez de données pour une fenêtre de {window}")
 
@@ -60,4 +61,73 @@ def plot_scores(scores, save_path="scores.png", window=100):
     print(f"Graph sauvegardé ici : {save_path}")
 
     plt.close()
+
+def classify_termination(self, state, terminated, truncated):
+    x, y, vx, vy, angle, _, left, right = state
+
+    if truncated:
+        return "time_limit"
+
+    if terminated:
+        # Successful landing
+        if left and right and abs(vx) < 0.1 and abs(vy) < 0.1 and abs(angle) < 0.1:
+            return "landed"
+
+        # Out of bounds
+        if abs(x) > 1.0 or y < 0:
+            return "out_of_bounds"
+
+        # Crash - trop rapide
+        if abs(vy) > 0.5:
+            return "crash_high_speed"
+
+        # Crash - mauvais angle
+        if abs(angle) > 0.4:
+            return "crash_bad_angle"
+
+    return "unknown"
+
+def update_termination_stats(self, state, terminated, truncated):
+    reason = self.classify_termination(state, terminated, truncated)
+    self.termination_stats[reason] += 1
+
+def log_with_termination_stats(self, log_file, episode, last_100_episode_mean, eps, last_graph_update_time):
+    total = sum(self.termination_stats.values())
+
+    header = "=" * 50
+    title = f"Termination stats at episode {episode}"
+
+    lines = []
+    lines.append(header)
+    lines.append(title)
+    lines.append(header)
+
+    if total == 0:
+        lines.append("No data yet.")
+    else:
+        for key, value in self.termination_stats.items():
+            percent = (value / total) * 100 if total > 0 else 0
+            lines.append(f"{key:<20} : {value:5d} ({percent:6.2f}%)")
+
+    lines.append(header)
+
+    log_message = (
+        f"{last_graph_update_time.strftime(DATE_FORMAT)}: "
+        f"Episode {episode} | "
+        f"Mean(100): {last_100_episode_mean:.2f} | "
+        f"epsilon: {eps:.2f}"
+    )
+
+    print("\n" + log_message)
+    for line in lines:
+        print(line)
+
+    log_file.write(log_message + '\n')
+    for line in lines:
+        log_file.write(line + '\n')
+    log_file.flush()
+
+    # reset stats 
+    for key in self.termination_stats:
+        self.termination_stats[key] = 0
 #==========================================================================================

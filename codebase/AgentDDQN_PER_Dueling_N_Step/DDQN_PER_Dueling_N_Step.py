@@ -19,7 +19,7 @@ from ..log_variable import device, RUNS_DIR, config_path, DATE_FORMAT, max_actio
 #========================================================
 
 class AgentDDQN_PER_Dueling_N_Step():
-    from ..utils.plotting import save_graph, plot_scores
+    from ..utils.plotting import save_graph, plot_scores, classify_termination, log_with_termination_stats, update_termination_stats
 
     def __init__(self, hyperparameter_set=None, hyperparameters=None, nb_episode=20000, seed=42):
 
@@ -277,7 +277,8 @@ class AgentDDQN_PER_Dueling_N_Step():
                     state = next_state
                     score += reward
                     if done:
-                        break 
+                        self.update_termination_stats(next_state, terminated, truncated)
+                        break
                 mean_rewards.append(score)
                 scores.append(score)
                 last_graph_update_time, eps = self._training_update(mean_rewards, epsilon_history, eps, last_graph_update_time)
@@ -288,10 +289,13 @@ class AgentDDQN_PER_Dueling_N_Step():
                     last_100_episode_mean = np.mean(mean_rewards[-100:])
 
                 if episode % 100 == 0:
-                    log_message = f"{last_graph_update_time.strftime(DATE_FORMAT)}: Episode {episode} | Mean(100): {last_100_episode_mean:.2f} | epsilon: {eps:.2f}"
-                    print(log_message)
-                    log_file.write(log_message + '\n')
-                    log_file.flush()
+                    self.log_with_termination_stats(
+                        log_file,
+                        episode,
+                        last_100_episode_mean,
+                        eps,
+                        last_graph_update_time
+                    )
 
                 if last_100_episode_mean >= self.stop_on_reward:
                     log_message = f"Solved in {episode} episodes! With a score of {np.mean(mean_rewards[-100:])}"
@@ -308,7 +312,7 @@ class AgentDDQN_PER_Dueling_N_Step():
                     "model_state_dict": self.qnetwork_local.state_dict(),
                     "hyperparameters": self.hyperparameters,
                 }, self.MODEL_FILE + "_last.pt")
-        self.plot_scores(scores, self.MODEL_FILE + "detail.png")
+        AgentDDQN_PER_Dueling_N_Step.plot_scores(scores, self.MODEL_FILE + "_detail.png")
         return scores
 
 # ─────────────────────────────────────────────────────────────────────────────
