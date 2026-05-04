@@ -1,4 +1,4 @@
-from codebase.DDQN_PER_Dueling_agent.DDQN_PER_Dueling import DDQN_PER_Dueling
+from codebase.AgentRainbowDQN.RainbowDQN import Agent
 import sys
 
 if __name__ == '__main__':
@@ -14,9 +14,11 @@ if __name__ == '__main__':
         print("<nb_episode> and <seed> must be valid number")
         exit(84)
 
-    dql = DDQN_PER_Dueling(
+
+    model = Agent(
         hyperparameter_set=sys.argv[1],
         nb_episode=nb_episode if nb_episode > 0 else 20000,
-        seed=seed if seed > 0 else 42
+        seed=seed if seed >= 0 else 42
     )
-    dql.run()
+
+    model.run()
