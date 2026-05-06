@@ -5,6 +5,7 @@ from codebase.AgentDDQN_PER_Dueling.DDQN_PER_Dueling import AgentDDQN_PER_Duelin
 from codebase.AgentDDQN_PER.DDQN_PER import AgentDDQN_PER
 from codebase.AgentDDQN.DDQN import AgentDDQN
 from codebase.AgentDQN.DQN import AgentDQN
+from codebase.AgentPPO.PPO import AgentPPO
 import sys
 
 def choose_model():
@@ -18,12 +19,13 @@ def choose_model():
     print("4. DDQN + PER + Dueling")
     print("5. DDQN + PER + Dueling + N-Step")
     print("6. DDQN + PER + Dueling + N-Step + Noisy Net")
-    print("7. Rainbow DQN\n")
+    print("7. Rainbow DQN")
+    print("8. PPO\n")
 
     while True:
         try:
-            choice = int(input("-> Enter your choice (1-7): "))
-            if 1 <= choice <= 7:
+            choice = int(input("-> Enter your choice (1-8): "))
+            if 1 <= choice <= 8:
                 break
             else:
                 print("Invalid choice, please enter a number between 1 and 7.")
@@ -37,7 +39,8 @@ def choose_model():
         4: "DDQN + PER + Dueling",
         5: "DDQN + PER + Dueling + N-Step",
         6: "DDQN + PER + Dueling + N-Step + Noisy Net",
-        7: "Rainbow DQN"
+        7: "Rainbow DQN",
+        8: "PPO"
     }
 
     print(f"\nYou selected: {models[choice]}\n")
@@ -72,6 +75,10 @@ if __name__ == '__main__':
                                         nb_episode=nb_episode if nb_episode > 0 else 20000,
                                         seed=seed if seed >= 0 else 42),
         7: lambda nb_episode, seed: AgentRainbowDQN(
+                                        hyperparameter_set=sys.argv[1],
+                                        nb_episode=nb_episode if nb_episode > 0 else 20000,
+                                        seed=seed if seed >= 0 else 42),
+        8: lambda nb_episode, seed: AgentPPO(
                                         hyperparameter_set=sys.argv[1],
                                         nb_episode=nb_episode if nb_episode > 0 else 20000,
                                         seed=seed if seed >= 0 else 42),

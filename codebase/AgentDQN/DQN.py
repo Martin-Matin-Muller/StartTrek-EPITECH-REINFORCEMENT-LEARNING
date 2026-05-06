@@ -13,7 +13,7 @@ import torch.optim as optim
 import yaml
 import os
 from ..log_variable import device, RUNS_DIR, config_path, DATE_FORMAT, max_action
-
+from ..utils.function_finders import get_activation, get_optimizer
 #========================================================
 
 class AgentDQN():
@@ -63,10 +63,6 @@ class AgentDQN():
         self.nb_neuron = hp["fc1_nodes"]
         self.nb_layer = hp["number_of_layer"]
 
-        # === Algo ===
-        self.activation_function = algo["activation_function"]
-        self.optimizer_function = algo["optimizer"]
-
         # === Env ===
         self.enable_wind = winds["enable_wind"]
         self.wind_power = winds["wind_power"]
@@ -89,6 +85,11 @@ class AgentDQN():
         self.lr = hypers["learning_rate_a"]
         self.stop_on_reward = hypers["stop_on_mean_reward"]
         self.discount_factor_g = 0.99
+
+        # === Algo ===
+        self.activation_function = get_activation(algo["activation_function"])
+        self.optimizer_function = get_optimizer(algo["optimizer"])
+
 
         # === Neural Network ===
         self.loss_fn = torch.nn.MSELoss()
@@ -175,11 +176,12 @@ class AgentDQN():
         self.action_size = env.action_space.n
         self.state_size = env.observation_space.shape[0]
 
-        self.qnetwork_local = QNetwork(self.state_size, self.action_size, self.seed, self.nb_neuron, self.nb_layer).to(device)
-        self.qnetwork_target = QNetwork(self.state_size, self.action_size, self.seed, self.nb_neuron, self.nb_layer).to(device)
+        self.qnetwork_local = QNetwork(self.state_size, self.action_size, self.seed, self.activation_function, self.nb_neuron, self.nb_layer).to(device)
+        self.qnetwork_target = QNetwork(self.state_size, self.action_size, self.seed, self.activation_function, self.nb_neuron, self.nb_layer).to(device)
 
         self.memory = ReplayBuffer(self.action_size, self.replay_memory_size, self.batch_size, self.seed)
-        self.optimizer = optim.Adam(self.qnetwork_local.parameters(), lr=self.lr) #TODO
+        # self.optimizer = optim.Adam(self.qnetwork_local.parameters(), lr=self.lr)
+        self.optimizer = self.optimizer_function(self.qnetwork_local.parameters(), lr=self.lr)
 
     def _training_update(self, rewards_per_episode,
                       epsilon_history, epsilon, last_graph_update_time):

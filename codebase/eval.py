@@ -16,6 +16,7 @@ from codebase.AgentDDQN_PER_Dueling.model import QNetwork as DDQN_PER_Dueling_Ne
 from codebase.AgentDDQN_PER_Dueling_N_Step.model import QNetwork as DDQN_PER_Dueling_N_Step_Network
 from codebase.AgentDDQN_PER_Dueling_N_Step_Noisy.model import QNetwork as DDQN_PER_Dueling_N_Step_Noisy_Network
 from codebase.AgentRainbowDQN.model import QNetwork as Rainbow_Network
+from codebase.AgentPPO.model import ActorNetwork as PPO_Network
 # import new model when implemented
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -75,6 +76,7 @@ def evaluate_all_models(runs_dir="runs", nb_episode=100, seed=42):
             ("DDQN_PER", DDQN_PER_Network),
             ("DDQN", DDQN_Network),
             ("DQN", DQN_Network),
+            # ("PPO", PPO_Network),
         ]
 
         model = None

@@ -213,7 +213,7 @@ class AgentDDQN_PER_Dueling_N_Step_Noisy():
 
         self.memory = PrioritizedReplayBuffer(action_size=self.action_size, state_size=self.state_size, buffer_size=self.replay_memory_size,
                 alpha=self.per_alpha, beta_start=self.per_beta_start, beta_frames=self.per_beta_frames,
-                batch_size=self.batch_size, seed=self.seed)
+                batch_size=self.batch_size, seed=self.seed, device=device)
         self.optimizer = optim.Adam(self.qnetwork_local.parameters(), lr=self.lr) #TODO
         self._nstep_buffer = deque(maxlen=self.n_step)
 
@@ -495,7 +495,7 @@ class PrioritizedReplayBuffer:
         is_weights  = (raw_weights / raw_weights.max()).astype(np.float32)
 
         # Build batched tensors
-        states = torch.from_numpy(self.states[indices]).float()
+        states = torch.from_numpy(self.states[indices]).float().to(self.device)
         actions     = torch.from_numpy(self.actions[indices]).long().unsqueeze(1).to(self.device)
         rewards     = torch.from_numpy(self.rewards[indices]).float().unsqueeze(1).to(self.device)
         next_states = torch.from_numpy(np.vstack(self.next_states[indices])).float().to(self.device)

@@ -246,6 +246,62 @@ LunarLander-8:
     epsilon:
       epsilon_init: 1.0
       epsilon_min: 0.01
-      epsilon_decay: 0.995
+      epsilon_decay: 0.9995
+    stop_on_mean_reward: 250
+    learning_rate_a: 0.0005
+
+LunarLander-9:
+  fc1_nodes: 64
+  number_of_layer: 1
+  algo: # changed activation an optimizer for tests
+    activation_function: leaky_relu # probably not adapted
+    optimizer: SGD
+  env:
+    wind:
+      enable_wind: false
+      wind_power: 0
+      turbulence_power: 0
+    gravity:
+      gravity: -10.0
+    fuel:
+      enable_fuel: false
+    continuous:
+      enable_continuous: false
+  hypers:
+    memory:
+      replay_memory_size: 100000
+      mini_batch_size: 128
+    epsilon:
+      epsilon_init: 1.0
+      epsilon_min: 0.01
+      epsilon_decay: 0.9995
+    stop_on_mean_reward: 250
+    learning_rate_a: 0.0005
+
+LunarLander-1-Mars:
+  fc1_nodes: 64
+  number_of_layer: 2 # add a layer
+  algo:
+    activation_function: relu
+    optimizer: adam
+  env:
+    wind: # try to mimic wind on mars
+      enable_wind: true 
+      wind_power: 16
+      turbulence_power: 0
+    gravity: # mars gravity
+      gravity: -3.70
+    fuel:
+      enable_fuel: false
+    continuous:
+      enable_continuous: false
+  hypers:
+    memory:
+      replay_memory_size: 100000
+      mini_batch_size: 128
+    epsilon:
+      epsilon_init: 1.0
+      epsilon_min: 0.01
+      epsilon_decay: 0.9995
     stop_on_mean_reward: 250
     learning_rate_a: 0.0005
