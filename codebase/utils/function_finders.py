@@ -13,8 +13,8 @@ def get_optimizer(name):
 
 def get_activation(name):
     return {
-        "relu": nn.ReLU,
-        "tanh": nn.Tanh,
-        "leaky_relu": nn.LeakyReLU,
+        "relu": nn.ReLU(),
+        "tanh": nn.Tanh(),
+        "leaky_relu": nn.LeakyReLU(negative_slope=0.01),
         # add other activation function
     }[name.lower()]

@@ -13,7 +13,7 @@ import torch.optim as optim
 import yaml
 import os
 from ..log_variable import device, RUNS_DIR, config_path, DATE_FORMAT, max_action
-
+from ..utils.function_finders import get_activation, get_optimizer
 #========================================================
 
 class AgentDDQN():
@@ -64,8 +64,8 @@ class AgentDDQN():
         self.nb_layer = hp["number_of_layer"]
 
         # === Algo ===
-        self.activation_function = algo["activation_function"]
-        self.optimizer_function = algo["optimizer"]
+        self.activation_function = get_activation(algo["activation_function"])
+        self.optimizer_function = get_optimizer(algo["optimizer"])
 
         # === Env ===
         self.enable_wind = winds["enable_wind"]
@@ -172,11 +172,11 @@ class AgentDDQN():
         self.action_size = env.action_space.n
         self.state_size = env.observation_space.shape[0]
 
-        self.qnetwork_local = QNetwork(self.state_size, self.action_size, self.seed, self.nb_neuron, self.nb_layer).to(device)
-        self.qnetwork_target = QNetwork(self.state_size, self.action_size, self.seed, self.nb_neuron, self.nb_layer).to(device)
+        self.qnetwork_local = QNetwork(self.state_size, self.action_size, self.seed, self.activation_function, self.nb_neuron, self.nb_layer).to(device)
+        self.qnetwork_target = QNetwork(self.state_size, self.action_size, self.seed, self.activation_function, self.nb_neuron, self.nb_layer).to(device)
 
         self.memory = ReplayBuffer(self.action_size, self.replay_memory_size, self.batch_size, self.seed)
-        self.optimizer = optim.Adam(self.qnetwork_local.parameters(), lr=self.lr) #TODO
+        self.optimizer = self.optimizer_function(self.qnetwork_local.parameters(), lr=self.lr) #TODO
 
     def _training_update(self, rewards_per_episode,
                       epsilon_history, epsilon, last_graph_update_time):

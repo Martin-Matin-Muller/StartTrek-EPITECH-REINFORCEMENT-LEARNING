@@ -53,12 +53,13 @@ class NoisyLinear(nn.Module):
 
 
 class QNetwork(nn.Module):
-    def __init__(self, state_size, action_size, seed, hidden_layer_neuron=64, nb_layer=1,
+    def __init__(self, state_size, action_size, seed, activation, hidden_layer_neuron=64, nb_layer=1,
                         n_atoms=51): # ADD C51
         super(QNetwork, self).__init__()
         self.seed = torch.manual_seed(seed)
         self.n_atoms   = n_atoms                       # ADD C51
         self.action_size = action_size
+        self.activation = activation
 
         self.layers = nn.ModuleList()
         self.layers.append(NoisyLinear(state_size, hidden_layer_neuron))
@@ -73,7 +74,7 @@ class QNetwork(nn.Module):
     def forward(self, state):
         batch = state.shape[0]
         for layer in self.layers:
-            state = F.relu(layer(state))
+            state = self.activation(layer(state))
 
         # ADD C51 — Dueling sur les distributions
         V = self.value_stream(state).view(batch, 1, self.n_atoms)

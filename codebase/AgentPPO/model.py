@@ -24,16 +24,16 @@ class ActorNetwork(nn.Module):
         # Output layer
         self.output = nn.Linear(hidden_dim, n_actions)
 
-        # self.optimizer = optimizer(self.parameters(), lr=alpha)
-        self.optimizer = optim.Adam(self.parameters(), lr=alpha)
+        self.optimizer = optimizer(self.parameters(), lr=alpha)
+        # self.optimizer = optim.Adam(self.parameters(), lr=alpha)
         self.device = device
         self.to(self.device)
 
     def forward(self, state):
         x = state
         for layer in self.layers:
-            x = T.relu(layer(x))
-            # x = self.activation(layer(x))
+            # x = T.relu(layer(x))
+            x = self.activation(layer(x))
 
         x = self.output(x)
         dist = Categorical(T.softmax(x, dim=-1))
@@ -58,16 +58,16 @@ class CriticNetwork(nn.Module):
         # Output layer
         self.output = nn.Linear(hidden_dim, 1)
 
-        # self.optimizer = optimizer(self.parameters(), lr=alpha)
-        self.optimizer = optim.Adam(self.parameters(), lr=alpha)
+        self.optimizer = optimizer(self.parameters(), lr=alpha)
+        # self.optimizer = optim.Adam(self.parameters(), lr=alpha)
         self.device = device
         self.to(self.device)
 
     def forward(self, state):
         x = state
         for layer in self.layers:
-            x = T.relu(layer(x))
-            # x = self.activation(layer(x))
+            # x = T.relu(layer(x))
+            x = self.activation(layer(x))
 
         value = self.output(x)
         return value

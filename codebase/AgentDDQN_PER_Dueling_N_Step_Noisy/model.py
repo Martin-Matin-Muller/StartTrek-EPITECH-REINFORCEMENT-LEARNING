@@ -60,9 +60,11 @@ class NoisyLinear(nn.Module):
 
 
 class QNetwork(nn.Module):
-    def __init__(self, state_size, action_size, seed, hidden_layer_neuron=64, nb_layer=1):
+    def __init__(self, state_size, action_size, seed, activation, hidden_layer_neuron=64, nb_layer=1):
         super(QNetwork, self).__init__()
         self.seed = torch.manual_seed(seed)
+
+        self.activation = activation
 
         # Add Noisy Couches partagées — NoisyLinear à la place de nn.Linear
         self.layers = nn.ModuleList()
@@ -76,7 +78,7 @@ class QNetwork(nn.Module):
 
     def forward(self, state):
         for layer in self.layers:
-            state = F.relu(layer(state))
+            state = self.activation(layer(state))
         V = self.value_stream(state)
         A = self.advantage_stream(state)
         return V + (A - A.mean(dim=1, keepdim=True))

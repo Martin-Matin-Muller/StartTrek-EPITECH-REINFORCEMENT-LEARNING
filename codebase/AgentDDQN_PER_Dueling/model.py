@@ -3,9 +3,11 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 class QNetwork(nn.Module):
-    def __init__(self, state_size, action_size, seed, hidden_layer_neuron=64, nb_layer=1):
+    def __init__(self, state_size, action_size, seed, activation, hidden_layer_neuron=64, nb_layer=1):
         super(QNetwork, self).__init__()
         self.seed = torch.manual_seed(seed)
+
+        self.activation = activation
 
         self.layers = nn.ModuleList()
         self.layers.append(nn.Linear(state_size, hidden_layer_neuron))
@@ -20,7 +22,7 @@ class QNetwork(nn.Module):
 
     def forward(self, state):
         for layer in self.layers:
-            state = F.relu(layer(state))
+            state = self.activation(layer(state))
 
         # ADD DUELING — deux têtes, une combinaison
         V = self.value_stream(state)           # (batch, 1)

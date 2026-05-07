@@ -14,7 +14,7 @@ from torch.nn.utils import clip_grad_norm_
 import yaml
 import os
 from ..log_variable import device, RUNS_DIR, config_path, DATE_FORMAT, max_action
-
+from ..utils.function_finders import get_activation, get_optimizer
 #========================================================
 
 class AgentRainbowDQN():
@@ -75,8 +75,8 @@ class AgentRainbowDQN():
         self.nb_layer = hp["number_of_layer"]
 
         # === Algo ===
-        self.activation_function = algo["activation_function"]
-        self.optimizer_function = algo["optimizer"]
+        self.activation_function = get_activation(algo["activation_function"])
+        self.optimizer_function = get_optimizer(algo["optimizer"])
 
         # === Env ===
         self.enable_wind = winds["enable_wind"]
@@ -256,7 +256,7 @@ class AgentRainbowDQN():
         self.memory = PrioritizedReplayBuffer(action_size=self.action_size, state_size=self.state_size, buffer_size=self.replay_memory_size,
                 alpha=self.per_alpha, beta_start=self.per_beta_start, beta_frames=self.per_beta_frames,
                 batch_size=self.batch_size, seed=self.seed, device=device)
-        self.optimizer = optim.Adam(self.qnetwork_local.parameters(), lr=self.lr) #TODO
+        self.optimizer = self.optimizer_function(self.qnetwork_local.parameters(), lr=self.lr) #TODO
         self._nstep_buffer = deque(maxlen=self.n_step)
 
     def _training_update(self, rewards_per_episode,

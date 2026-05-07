@@ -9,6 +9,8 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import pandas as pd
 
+from .utils.function_finders import get_activation, get_optimizer
+
 from codebase.AgentDQN.model import QNetwork as DQN_Network
 from codebase.AgentDDQN.model import QNetwork as DDQN_Network
 from codebase.AgentDDQN_PER.model import QNetwork as DDQN_PER_Network
@@ -76,22 +78,37 @@ def evaluate_all_models(runs_dir="runs", nb_episode=100, seed=42):
             ("DDQN_PER", DDQN_PER_Network),
             ("DDQN", DDQN_Network),
             ("DQN", DQN_Network),
-            # ("PPO", PPO_Network),
+            ("PPO", PPO_Network),
         ]
 
         model = None
         for key, ModelClass in MODEL_MAP:
             if key in file:
-                model = ModelClass(
-                    state_size=state_dim,
-                    action_size=action_dim,
-                    seed=seed,
-                    hidden_layer_neuron=config["fc1_nodes"],
+                if key == "PPO":
+                    model = ModelClass(
+                    n_actions=action_dim,
+                    input_dims=state_dim,
+                    alpha=0.0,  # not used in eval
+                    activation=get_activation(config["algo"]["activation_function"]),
+                    optimizer=torch.optim.Adam, # not used in eval
+                    hidden_dim=config["fc1_nodes"],
                     nb_layer=config["number_of_layer"]
-                ).to(device)
+    ).to(device)
+                else:
+                    model = ModelClass(
+                        state_size=state_dim,
+                        action_size=action_dim,
+                        seed=seed,
+                        activation=get_activation(config["algo"]["activation_function"]),
+                        hidden_layer_neuron=config["fc1_nodes"],
+                        nb_layer=config["number_of_layer"]
+                    ).to(device)
                 break
 
-        model.load_state_dict(checkpoint["model_state_dict"])
+        if "PPO" in file:
+            model.load_state_dict(checkpoint["model_state_dict"]["actor"])
+        else:
+            model.load_state_dict(checkpoint["model_state_dict"])
         model.eval()
 
         rewards = []
@@ -105,7 +122,16 @@ def evaluate_all_models(runs_dir="runs", nb_episode=100, seed=42):
 
             with torch.no_grad():
                 for step in range(1000):
-                    action = model(state.unsqueeze(0)).argmax(dim=1).item()
+                    if "PPO" in file: # PPO return Categorical instead of just an output
+                        dist = model(state.unsqueeze(0))
+                        action = torch.argmax(dist.probs, dim=1).item()
+                    elif "Rainbow" in file: # atoms 
+                        dist = model(state.unsqueeze(0))
+                        support = torch.linspace(-300, 300, 51).to(device)
+                        expected_q = (dist * support).sum(dim=2)
+                        action = expected_q.argmax(dim=1).item()
+                    else:
+                        action = model(state.unsqueeze(0)).argmax(dim=1).item()
 
                     next_state, reward, terminated, truncated, _ = env.step(action)
                     done = terminated or truncated
@@ -142,29 +168,30 @@ def evaluate_all_models(runs_dir="runs", nb_episode=100, seed=42):
 
     model_files = [k for k, _ in sorted_items]
     model_names = [k.replace(".pt", "") for k in model_files]
+    model_names = [name.replace(".pt", "").replace("LunarLander-", "") for name in model_files]
 
     means = [v["mean"] for _, v in sorted_items]
     stds = [v["std"] for _, v in sorted_items]
     success_rates = [v["success_rate"] for _, v in sorted_items]
 
-    plt.figure(figsize=(15, 5))
+    plt.figure(figsize=(25, 5))
 
     x = np.arange(len(model_names))
 
     plt.subplot(1, 3, 1)
-    plt.bar(x, means)
+    plt.bar(x, means, width=0.6)
     plt.title("Mean Reward")
-    plt.xticks(x, model_names, rotation=30, ha='right')
+    plt.xticks(x, model_names, rotation=45, ha='right', fontsize=8)
 
     plt.subplot(1, 3, 2)
-    plt.bar(x, stds)
+    plt.bar(x, stds, width=0.6)
     plt.title("Std Dev")
-    plt.xticks(x, model_names, rotation=30, ha='right')
+    plt.xticks(x, model_names, rotation=45, ha='right', fontsize=8)
 
     plt.subplot(1, 3, 3)
-    plt.bar(x, success_rates)
+    plt.bar(x, success_rates, width=0.6)
     plt.title("Success Rate")
-    plt.xticks(x, model_names, rotation=30, ha='right')
+    plt.xticks(x, model_names, rotation=45, ha='right', fontsize=8)
 
     plt.tight_layout()
     plt.savefig(os.path.join(runs_dir, "comparison.png"))

@@ -253,7 +253,7 @@ LunarLander-8:
 LunarLander-9:
   fc1_nodes: 64
   number_of_layer: 1
-  algo: # changed activation an optimizer for tests
+  algo: # changed activation and optimizer for tests
     activation_function: leaky_relu # probably not adapted
     optimizer: SGD
   env:
