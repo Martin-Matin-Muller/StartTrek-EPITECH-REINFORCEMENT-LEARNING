@@ -246,10 +246,10 @@ class AgentRainbowDQN():
         self.support = torch.linspace(self.v_min, self.v_max, self.n_atoms).to(device)
         self.delta_z = (self.v_max - self.v_min) / (self.n_atoms - 1)
 
-        self.qnetwork_local  = QNetwork(self.state_size, self.action_size, self.seed,
+        self.qnetwork_local  = QNetwork(self.state_size, self.action_size, self.seed, self.activation_function,
                                         self.nb_neuron, self.nb_layer,
                                         n_atoms=self.n_atoms).to(device)  # ADD C51
-        self.qnetwork_target = QNetwork(self.state_size, self.action_size, self.seed,
+        self.qnetwork_target = QNetwork(self.state_size, self.action_size, self.seed, self.activation_function,
                                         self.nb_neuron, self.nb_layer,
                                         n_atoms=self.n_atoms).to(device)  # ADD C51
 

@@ -180,7 +180,6 @@ class AgentDQN():
         self.qnetwork_target = QNetwork(self.state_size, self.action_size, self.seed, self.activation_function, self.nb_neuron, self.nb_layer).to(device)
 
         self.memory = ReplayBuffer(self.action_size, self.replay_memory_size, self.batch_size, self.seed)
-        # self.optimizer = optim.Adam(self.qnetwork_local.parameters(), lr=self.lr)
         self.optimizer = self.optimizer_function(self.qnetwork_local.parameters(), lr=self.lr)
 
     def _training_update(self, rewards_per_episode,

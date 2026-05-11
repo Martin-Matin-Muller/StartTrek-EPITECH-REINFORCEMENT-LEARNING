@@ -1,30 +1,30 @@
 LunarLander-x:
-  fc1_nodes: 8
-  number_of_layer: 1
+  fc1_nodes: [number of nodes]
+  number_of_layer: [number of layer]
   algo:
-    activation_function: relu     #Louis (27/04/2026 - 10h32): switch case de batard pas tant que ça en vrai
-    optimizer: adam                #Louis (27/04/2026 - 10h32): switch case de batard pas tant que ça en vrai
+    activation_function: [function availble in pytorch]
+    optimizer: [function availble in pytorch]          
   env:
     wind:
-      enable_wind: false
-      wind_power: 0
-      turbulence_power: 0
+      enable_wind: false # default value
+      wind_power: 0 # default value
+      turbulence_power: 0 # default value
     gravity:
-      gravity: -10.0
+      gravity: -10.0 # default value
     fuel:
       enable_fuel: false
     continuous:
-      enable_continuous: false
+      enable_continuous: false # default value
   hypers:
     memory:
-      replay_memory_size: 100000
-      mini_batch_size: 64
+      replay_memory_size: [memory size]
+      mini_batch_size: [batch size]
     epsilon:
       epsilon_init: 0.9
       epsilon_min: 0.01
-      epsilon_decay: 0.9999
-    stop_on_mean_reward: 300
-    learning_rate_a: 0.001
+      epsilon_decay: [epsilon reduction applied after each step]
+    stop_on_mean_reward: [after acheiving this score to stop training]
+    learning_rate_a: [learning rate]
 
 LunarLander-1:
   fc1_nodes: 32
@@ -256,6 +256,34 @@ LunarLander-9:
   algo: # changed activation and optimizer for tests
     activation_function: leaky_relu # probably not adapted
     optimizer: SGD
+  env:
+    wind:
+      enable_wind: false
+      wind_power: 0
+      turbulence_power: 0
+    gravity:
+      gravity: -10.0
+    fuel:
+      enable_fuel: false
+    continuous:
+      enable_continuous: false
+  hypers:
+    memory:
+      replay_memory_size: 100000
+      mini_batch_size: 128
+    epsilon:
+      epsilon_init: 1.0
+      epsilon_min: 0.01
+      epsilon_decay: 0.9995
+    stop_on_mean_reward: 250
+    learning_rate_a: 0.0005
+
+LunarLander-10:
+  fc1_nodes: 32
+  number_of_layer: 3
+  algo:
+    activation_function: relu
+    optimizer: adam
   env:
     wind:
       enable_wind: false

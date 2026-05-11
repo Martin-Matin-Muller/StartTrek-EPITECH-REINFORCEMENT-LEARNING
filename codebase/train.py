@@ -28,7 +28,7 @@ def choose_model():
             if 1 <= choice <= 8:
                 break
             else:
-                print("Invalid choice, please enter a number between 1 and 7.")
+                print("Invalid choice, please enter a number between 1 and 8.")
         except ValueError:
             print("Please enter a valid number.")
 
@@ -99,4 +99,5 @@ if __name__ == '__main__':
     choice = choose_model()
     model = models[choice](nb_episode, seed)
 
+    # model.run(visualization=True)
     model.run()
