@@ -10,6 +10,7 @@ import yaml
 import os
 from ..log_variable import RUNS_DIR, config_path, DATE_FORMAT, max_action
 from ..utils.lunarDebug import LunarLanderDebug
+from ..utils.fuel_function import fuel_reward
 #========================================================
 
 class AgentHuman():
@@ -154,6 +155,8 @@ class AgentHuman():
                         action = 0
                     next_state, reward, terminated, truncated, _ = env.step(action)
                     done = terminated or truncated
+                    if self.enable_fuel:
+                        reward = fuel_reward(action, reward)
                     score += reward
                     if done:
                         self.update_termination_stats(next_state, terminated, truncated)

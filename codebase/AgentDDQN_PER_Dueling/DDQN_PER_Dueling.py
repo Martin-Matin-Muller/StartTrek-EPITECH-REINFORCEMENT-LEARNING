@@ -15,6 +15,7 @@ import yaml
 import os
 from ..log_variable import device, RUNS_DIR, config_path, DATE_FORMAT, max_action
 from ..utils.function_finders import get_activation, get_optimizer
+from ..utils.fuel_function import fuel_reward
 #========================================================
 
 class AgentDDQN_PER_Dueling():
@@ -235,6 +236,8 @@ class AgentDDQN_PER_Dueling():
                     action = self.act(state, eps)
                     next_state, reward, terminated, truncated, _ = env.step(action)
                     done = terminated or truncated
+                    if self.enable_fuel:
+                        reward = fuel_reward(action, reward)
                     self.step(state, action, reward, next_state, done)
                     state = next_state
                     score += reward

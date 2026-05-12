@@ -8,6 +8,7 @@ import torch
 import yaml
 import os
 from ..log_variable import RUNS_DIR, config_path, DATE_FORMAT, max_action
+from ..utils.fuel_function import fuel_reward
 #========================================================
 
 class AgentBasic():
@@ -163,6 +164,8 @@ class AgentBasic():
                     action = self.act(state)
                     next_state, reward, terminated, truncated, _ = env.step(action)
                     done = terminated or truncated
+                    if self.enable_fuel:
+                        reward = fuel_reward(action, reward)
                     state = next_state
                     score += reward
                     if done:
