@@ -64,6 +64,7 @@ class LunarLanderDebug:
         pygame.display.flip()
 
 # Debug
+# env = gym.make("LunarLander-v3", render_mode="human")
 # env = LunarLanderDebug(env)
 # env.add("Total", lambda e, r: e.total_reward)
 # env.add("Episode", lambda e, r: e.episode)

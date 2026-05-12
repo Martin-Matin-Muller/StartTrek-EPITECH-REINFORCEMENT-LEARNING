@@ -9,10 +9,12 @@ import torch
 import yaml
 import os
 from ..log_variable import RUNS_DIR, config_path, DATE_FORMAT, max_action
+from ..utils.lunarDebug import LunarLanderDebug
 #========================================================
 
 class AgentHuman():
-    from ..utils.plotting import save_graph, plot_scores, classify_termination, log_with_termination_stats, update_termination_stats
+    from ..utils.plotting import save_graph, plot_scores
+    from ..utils.plotting import classify_termination, log_with_termination_stats, update_termination_stats
 
     def __init__(self, hyperparameter_set=None, hyperparameters=None, nb_episode=20000, seed=42):
 
@@ -66,9 +68,9 @@ class AgentHuman():
         self.stop_on_reward = hypers["stop_on_mean_reward"]
 
         # === Path to Run info ===
-        self.LOG_FILE = os.path.join(RUNS_DIR, f'{self.hyperparameter_set}-Basic.log')
-        self.MODEL_FILE = os.path.join(RUNS_DIR, f'{self.hyperparameter_set}-Basic')
-        self.GRAPH_FILE = os.path.join(RUNS_DIR, f'{self.hyperparameter_set}-Basic.png')
+        self.LOG_FILE = os.path.join(RUNS_DIR, f'{self.hyperparameter_set}-Human.log')
+        self.MODEL_FILE = os.path.join(RUNS_DIR, f'{self.hyperparameter_set}-Human')
+        self.GRAPH_FILE = os.path.join(RUNS_DIR, f'{self.hyperparameter_set}-Human.png')
 
         self.termination_stats = {
             "landed": 0,
@@ -94,8 +96,8 @@ class AgentHuman():
         return last_graph_update_time, log_message
 
     def _setup_training(self, env):
-        self.action_size = env.action_space.n
-        self.state_size = env.observation_space.shape[0]
+        self.action_size = env.env.action_space.n
+        self.state_size = env.env.observation_space.shape[0]
 
     def _training_update(self, rewards_per_episode,
                       epsilon_history, epsilon, last_graph_update_time):
@@ -118,6 +120,9 @@ class AgentHuman():
                         enable_wind=self.enable_wind,
                         wind_power=self.wind_power, turbulence_power=self.turbulence_power)
         env.reset(seed=self.seed)
+        env = LunarLanderDebug(env)
+        env.add("Total", lambda e, r: e.total_reward)
+        env.add("Episode", lambda e, r: e.episode)
         pygame.init()
         # Setup training value or load best model
         self._setup_training(env)
@@ -159,10 +164,10 @@ class AgentHuman():
 
 
                 episode += 1
-                if len(mean_rewards) >= 100:
-                    last_100_episode_mean = np.mean(mean_rewards[-100:])
+                if len(mean_rewards) >= 1:
+                    last_100_episode_mean = np.mean(mean_rewards[-1:])
 
-                if episode % 100 == 0:
+                if episode % 1 == 0:
                     self.log_with_termination_stats(
                         log_file,
                         episode,
@@ -181,7 +186,7 @@ class AgentHuman():
                         last_graph_update_time,
                         start_time
                     )
-                    log_message = f"Solved in {episode} episodes! With a score of {np.mean(mean_rewards[-100:])}"
+                    log_message = f"Solved in {episode} episodes! With a score of {np.mean(mean_rewards[-1:])}"
                     print(log_message)
                     log_file.write(log_message + '\n')
                     log_file.flush()
