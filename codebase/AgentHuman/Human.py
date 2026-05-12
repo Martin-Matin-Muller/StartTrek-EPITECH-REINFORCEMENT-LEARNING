@@ -124,6 +124,7 @@ class AgentHuman():
         env = LunarLanderDebug(env)
         env.add("Total", lambda e, r: e.total_reward)
         env.add("Episode", lambda e, r: e.episode)
+        env.add("Fuel")
         pygame.init()
         # Setup training value or load best model
         self._setup_training(env)
@@ -143,6 +144,7 @@ class AgentHuman():
             while (episode < self.nb_episode):
                 _, _ = env.reset()
                 score = 0
+                fuel = MAX_FUEL
                 for _ in range(max_action):
                     keys = pygame.key.get_pressed()
 
@@ -158,6 +160,7 @@ class AgentHuman():
                     done = terminated or truncated
                     if self.enable_fuel:
                         reward, fuel = fuel_reward(action, reward, fuel)
+                    env.update("Fuel", fuel)
                     score += reward
                     if done:
                         if self.enable_fuel:
