@@ -10,7 +10,7 @@ import os
 from ..log_variable import RUNS_DIR, config_path, DATE_FORMAT, max_action
 #========================================================
 
-class AgentDDQN():
+class AgentBasic():
     from ..utils.plotting import save_graph, plot_scores, classify_termination, log_with_termination_stats, update_termination_stats
 
     def __init__(self, hyperparameter_set=None, hyperparameters=None, nb_episode=20000, seed=42):
@@ -78,8 +78,33 @@ class AgentDDQN():
             "unknown": 0
         }
 
-    def act(self):
-        return
+    def act(self, state):
+        x = state[0]
+        y = state[1]
+        vx = state[2]
+        vy = state[3]
+        angle = state[4]
+        angular_vel = state[5]
+
+        # trop pencher sur la gauche
+        if angle > 0.1:
+            return 3  # moteur droite
+        # trop pencher sur la droite
+        if angle < -0.1:
+            return 1  # moteur gauche
+
+        # tombe trop
+        if vy < -0.5:
+            return 2  # moteur principal
+
+        # trop à gauche
+        if x < -0.1: # moteur droite
+            return 3
+
+        # trop à droite 
+        if x > 0.1:
+            return 1 # moteur gauche
+        return 0
 
 
     def _setup_logging(self, log_file):
@@ -135,10 +160,9 @@ class AgentDDQN():
                 state, _ = env.reset()
                 score = 0
                 for _ in range(max_action):
-                    action = self.act(state, eps)
+                    action = self.act(state)
                     next_state, reward, terminated, truncated, _ = env.step(action)
                     done = terminated or truncated
-                    self.step(state, action, reward, next_state, done)
                     state = next_state
                     score += reward
                     if done:
@@ -177,14 +201,12 @@ class AgentDDQN():
                     log_file.write(log_message + '\n')
                     log_file.flush()
                     torch.save({
-                        "model_state_dict": self.qnetwork_local.state_dict(),
                         "hyperparameters": self.hyperparameters,
                     }, self.MODEL_FILE + "_solved.pt")
                     break
         except KeyboardInterrupt:
             torch.save({
-                    "model_state_dict": self.qnetwork_local.state_dict(),
                     "hyperparameters": self.hyperparameters,
                 }, self.MODEL_FILE + "_last.pt")
-        AgentDDQN.plot_scores(scores, self.MODEL_FILE + "_detail.png")
+        AgentBasic.plot_scores(scores, self.MODEL_FILE + "_detail.png")
         return scores

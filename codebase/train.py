@@ -6,6 +6,8 @@ from codebase.AgentDDQN_PER.DDQN_PER import AgentDDQN_PER
 from codebase.AgentDDQN.DDQN import AgentDDQN
 from codebase.AgentDQN.DQN import AgentDQN
 from codebase.AgentPPO.PPO import AgentPPO
+from codebase.AgentHuman.Human import AgentHuman
+from codebase.AgentBasic.Basic import AgentBasic
 import sys
 
 def choose_model():
@@ -20,15 +22,17 @@ def choose_model():
     print("5. DDQN + PER + Dueling + N-Step")
     print("6. DDQN + PER + Dueling + N-Step + Noisy Net")
     print("7. Rainbow DQN")
-    print("8. PPO\n")
+    print("8. PPO")
+    print("9. Manual model")
+    print("10. Basic\n")
 
     while True:
         try:
-            choice = int(input("-> Enter your choice (1-8): "))
-            if 1 <= choice <= 8:
+            choice = int(input("-> Enter your choice (1-10): "))
+            if 1 <= choice <= 10:
                 break
             else:
-                print("Invalid choice, please enter a number between 1 and 8.")
+                print("Invalid choice, please enter a number between 1 and 10.")
         except ValueError:
             print("Please enter a valid number.")
 
@@ -40,7 +44,9 @@ def choose_model():
         5: "DDQN + PER + Dueling + N-Step",
         6: "DDQN + PER + Dueling + N-Step + Noisy Net",
         7: "Rainbow DQN",
-        8: "PPO"
+        8: "PPO",
+        9: "Manual mode",
+        10: "Basic"
     }
 
     print(f"\nYou selected: {models[choice]}\n")
@@ -79,6 +85,14 @@ if __name__ == '__main__':
                                         nb_episode=nb_episode if nb_episode > 0 else 20000,
                                         seed=seed if seed >= 0 else 42),
         8: lambda nb_episode, seed: AgentPPO(
+                                        hyperparameter_set=sys.argv[1],
+                                        nb_episode=nb_episode if nb_episode > 0 else 20000,
+                                        seed=seed if seed >= 0 else 42),
+        9: lambda nb_episode, seed: AgentHuman(
+                                        hyperparameter_set=sys.argv[1],
+                                        nb_episode=nb_episode if nb_episode > 0 else 20000,
+                                        seed=seed if seed >= 0 else 42),
+        10: lambda nb_episode, seed: AgentBasic(
                                         hyperparameter_set=sys.argv[1],
                                         nb_episode=nb_episode if nb_episode > 0 else 20000,
                                         seed=seed if seed >= 0 else 42),
