@@ -12,9 +12,9 @@ import torch.nn.functional as F
 import torch.optim as optim
 import yaml
 import os
-from ..log_variable import device, RUNS_DIR, config_path, DATE_FORMAT, max_action
+from ..log_variable import device, RUNS_DIR, config_path, DATE_FORMAT, max_action, MAX_FUEL
 from ..utils.function_finders import get_activation, get_optimizer
-from ..utils.fuel_function import fuel_reward
+from ..utils.fuel_function import fuel_reward, fuel_end_reward
 #========================================================
 
 class AgentDQN():
@@ -219,7 +219,8 @@ class AgentDQN():
         last_100_episode_mean = -999
         episode = 0
         epsilon_history = []
-        eps = self.epsilon_init                    # initialize epsilon
+        eps = self.epsilon_init   
+        fuel = MAX_FUEL
 
         try:
             while (episode < self.nb_episode):
@@ -230,11 +231,12 @@ class AgentDQN():
                     next_state, reward, terminated, truncated, _ = env.step(action)
                     done = terminated or truncated
                     if self.enable_fuel:
-                        reward = fuel_reward(action, reward)
+                        reward, fuel = fuel_reward(action, reward, fuel)
                     self.step(state, action, reward, next_state, done)
                     state = next_state
                     score += reward
                     if done:
+                        score += fuel_end_reward(fuel)
                         self.update_termination_stats(next_state, terminated, truncated)
                         break
                 mean_rewards.append(score)

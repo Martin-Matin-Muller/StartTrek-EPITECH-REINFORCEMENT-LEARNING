@@ -7,8 +7,8 @@ from datetime import datetime, timedelta
 import torch
 import yaml
 import os
-from ..log_variable import RUNS_DIR, config_path, DATE_FORMAT, max_action
-from ..utils.fuel_function import fuel_reward
+from ..log_variable import RUNS_DIR, config_path, DATE_FORMAT, max_action, MAX_FUEL
+from ..utils.fuel_function import fuel_reward, fuel_end_reward
 #========================================================
 
 class AgentBasic():
@@ -155,6 +155,7 @@ class AgentBasic():
         episode = 0
         epsilon_history = []
         eps = 0
+        fuel = MAX_FUEL
 
         try:
             while (episode < self.nb_episode):
@@ -165,10 +166,11 @@ class AgentBasic():
                     next_state, reward, terminated, truncated, _ = env.step(action)
                     done = terminated or truncated
                     if self.enable_fuel:
-                        reward = fuel_reward(action, reward)
+                        reward, fuel = fuel_reward(action, reward, fuel)
                     state = next_state
                     score += reward
                     if done:
+                        score += fuel_end_reward(fuel)
                         self.update_termination_stats(next_state, terminated, truncated)
                         break
                 mean_rewards.append(score)

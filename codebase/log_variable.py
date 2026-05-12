@@ -11,4 +11,5 @@ matplotlib.use('Agg') # generate plots as images and save them to a file instead
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 config_path = "config/hyperparameters.yml"
 max_action = 1000
+MAX_FUEL = 8000
 #========================================================
