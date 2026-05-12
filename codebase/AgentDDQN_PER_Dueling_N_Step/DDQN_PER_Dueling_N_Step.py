@@ -169,13 +169,16 @@ class AgentDDQN_PER_Dueling_N_Step():
         done_n       = self._nstep_buffer[-1][4]
         return state_n, action_n, reward_n, next_state_n, done_n
 
-    def act(self, state, eps=0.):
+    def act(self, state, fuel, eps=0.):
         state = torch.from_numpy(state).float().unsqueeze(0).to(device)
         self.qnetwork_local.eval()
         with torch.no_grad():
             action_values = self.qnetwork_local(state)
         self.qnetwork_local.train()
 
+        if self.enable_fuel and fuel <= 0:
+            return 0 # do nothing if no more fuel
+        # Epsilon-greedy action selection
         if random.random() > eps:
             return np.argmax(action_values.cpu().data.numpy())
         else:
@@ -281,7 +284,7 @@ class AgentDDQN_PER_Dueling_N_Step():
                 state, _ = env.reset()
                 score = 0
                 for _ in range(max_action):
-                    action = self.act(state, eps)
+                    action = self.act(state, fuel, eps)
                     next_state, reward, terminated, truncated, _ = env.step(action)
                     done = terminated or truncated
                     if self.enable_fuel:

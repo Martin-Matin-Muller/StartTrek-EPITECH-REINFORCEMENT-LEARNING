@@ -79,7 +79,10 @@ class AgentBasic():
             "unknown": 0
         }
 
-    def act(self, state):
+    def act(self, state, fuel):
+        if self.enable_fuel and fuel <= 0:
+            return 0 # do nothing if no more fuel
+        
         x = state[0]
         y = state[1]
         vx = state[2]
@@ -162,7 +165,7 @@ class AgentBasic():
                 state, _ = env.reset()
                 score = 0
                 for _ in range(max_action):
-                    action = self.act(state)
+                    action = self.act(state, fuel)
                     next_state, reward, terminated, truncated, _ = env.step(action)
                     done = terminated or truncated
                     if self.enable_fuel:

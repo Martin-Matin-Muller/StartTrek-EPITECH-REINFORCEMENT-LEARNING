@@ -82,8 +82,10 @@ class AgentHuman():
             "unknown": 0
         }
 
-    def act(self):
-        return
+    def act(self, fuel):
+        if self.enable_fuel and fuel <= 0:
+            return 0 # do nothing if no more fuel
+        return None
 
 
     def _setup_logging(self, log_file):

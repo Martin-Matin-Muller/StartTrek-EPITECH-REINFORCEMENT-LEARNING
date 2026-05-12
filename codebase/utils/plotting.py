@@ -115,8 +115,9 @@ def log_with_termination_stats(self, log_file, episode, last_100_episode_mean, e
     elapsed = datetime.now() - start_time
     elapsed_str = str(elapsed).split('.')[0]  # removes microseconds
 
+
+    
     log_message = (
-        # f"{last_graph_update_time.strftime(DATE_FORMAT)}: "
         f"{elapsed_str}: "
         f"Episode {episode} | "
         f"Mean(100): {last_100_episode_mean:.2f} | "

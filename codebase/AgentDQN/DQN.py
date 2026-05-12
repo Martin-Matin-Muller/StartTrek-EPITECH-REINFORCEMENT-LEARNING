@@ -122,13 +122,15 @@ class AgentDQN():
                 experiences = self.memory.sample()
                 self.learn(experiences, discount_factor)
 
-    def act(self, state, eps=0.):
+    def act(self, state, fuel, eps=0.):
         state = torch.from_numpy(state).float().unsqueeze(0).to(device)
         self.qnetwork_local.eval()
         with torch.no_grad():
             action_values = self.qnetwork_local(state)
         self.qnetwork_local.train()
 
+        if self.enable_fuel and fuel <= 0:
+            return 0 # do nothing if no more fuel
         # Epsilon-greedy action selection
         if random.random() > eps:
             return np.argmax(action_values.cpu().data.numpy())
@@ -226,8 +228,9 @@ class AgentDQN():
             while (episode < self.nb_episode):
                 state, _ = env.reset()
                 score = 0
+                fuel = MAX_FUEL
                 for _ in range(max_action):
-                    action = self.act(state, eps)
+                    action = self.act(state, fuel, eps)
                     next_state, reward, terminated, truncated, _ = env.step(action)
                     done = terminated or truncated
                     if self.enable_fuel:

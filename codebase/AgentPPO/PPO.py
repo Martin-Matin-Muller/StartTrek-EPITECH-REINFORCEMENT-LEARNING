@@ -188,7 +188,10 @@ class AgentPPO():
             self.learn()
             self.learn_iters += 1
 
-    def act(self, observation):
+    def act(self, observation, fuel):
+        if self.enable_fuel and fuel <= 0:
+            return 0, 0.0, 0.0 # do nothing if no more fuel
+        
         state = T.from_numpy(observation).float().unsqueeze(0).to(device)
 
         dist = self.actor(state)
@@ -281,7 +284,7 @@ class AgentPPO():
                 state, _ = env.reset()
                 score = 0.0
                 for _ in range(max_action):
-                    action, prob, val = self.act(state)
+                    action, prob, val = self.act(state, fuel)
                     next_state, reward, terminated, truncated, _ = env.step(action)
                     done = terminated or truncated
                     if self.enable_fuel:
