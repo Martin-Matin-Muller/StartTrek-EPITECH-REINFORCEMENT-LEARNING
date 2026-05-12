@@ -62,21 +62,3 @@ class LunarLanderDebug:
                 pass
 
         pygame.display.flip()
-
-# Debug
-# env = gym.make("LunarLander-v3", render_mode="human")
-# env = LunarLanderDebug(env)
-# env.add("Total", lambda e, r: e.total_reward)
-# env.add("Episode", lambda e, r: e.episode)
-
-# observation, info = env.reset(seed=42)
-
-# for _ in range(1000):
-#     action = env.env.action_space.sample()
-
-#     observation, reward, terminated, truncated, info = env.step(action)
-
-#     if terminated or truncated:
-#         observation, info = env.reset()
-
-# env.env.close()

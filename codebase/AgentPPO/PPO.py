@@ -10,8 +10,9 @@ import torch.nn as nn
 import torch.optim as optim
 from torch.distributions.categorical import Categorical
 from codebase.AgentPPO.model import ActorNetwork, CriticNetwork
-from ..log_variable import device, RUNS_DIR, config_path, DATE_FORMAT, max_action
+from ..log_variable import device, RUNS_DIR, config_path, DATE_FORMAT, max_action, MAX_FUEL
 from ..utils.function_finders import get_activation, get_optimizer
+from ..utils.fuel_function import fuel_reward, fuel_end_reward
 
 class PPOMemory:
     def __init__(self, batch_size):
@@ -272,7 +273,7 @@ class AgentPPO():
         mean_rewards = []
         scores = []
         last_100_episode_mean = -999
-
+        fuel = MAX_FUEL
         episode = 0
 
         try:
@@ -283,12 +284,15 @@ class AgentPPO():
                     action, prob, val = self.act(state)
                     next_state, reward, terminated, truncated, _ = env.step(action)
                     done = terminated or truncated
-
+                    if self.enable_fuel:
+                        reward, fuel = fuel_reward(action, reward, fuel)
                     self.step(state, action, prob, val, reward, done)
 
                     state = next_state
                     score += reward
                     if done:
+                        if self.enable_fuel:
+                            score += fuel_end_reward(fuel)
                         self.update_termination_stats(next_state, terminated, truncated)
                         break
                 mean_rewards.append(score)

@@ -270,7 +270,8 @@ class AgentDDQN_PER_Dueling_N_Step_Noisy():
                     state = next_state
                     score += reward
                     if done:
-                        score += fuel_end_reward(fuel)
+                        if self.enable_fuel:
+                            score += fuel_end_reward(fuel)
                         self.update_termination_stats(next_state, terminated, truncated)
                         break
                 mean_rewards.append(score)
