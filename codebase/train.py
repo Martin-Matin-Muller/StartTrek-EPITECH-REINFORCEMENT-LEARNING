@@ -7,7 +7,8 @@ from codebase.AgentDDQN.DDQN import AgentDDQN
 from codebase.AgentDQN.DQN import AgentDQN
 from codebase.AgentPPO.PPO import AgentPPO
 from codebase.AgentHuman.Human import AgentHuman
-from codebase.AgentBasic.Basic import AgentBasic
+from codebase.AgentHeuristic.Heuristic import AgentHeuristic
+from codebase.AgentQLearning.QLearning import AgentQLearning
 import sys
 
 def choose_model():
@@ -24,15 +25,16 @@ def choose_model():
     print("7. Rainbow DQN")
     print("8. PPO")
     print("9. Manual model")
-    print("10. Basic\n")
+    print("10. Heuristic")
+    print("11. QLearning\n")
 
     while True:
         try:
-            choice = int(input("-> Enter your choice (1-10): "))
-            if 1 <= choice <= 10:
+            choice = int(input("-> Enter your choice (1-11): "))
+            if 1 <= choice <= 11:
                 break
             else:
-                print("Invalid choice, please enter a number between 1 and 10.")
+                print("Invalid choice, please enter a number between 1 and 11.")
         except ValueError:
             print("Please enter a valid number.")
 
@@ -46,7 +48,8 @@ def choose_model():
         7: "Rainbow DQN",
         8: "PPO",
         9: "Manual mode",
-        10: "Basic"
+        10: "Heuristic",
+        11: "QLearning"
     }
 
     print(f"\nYou selected: {models[choice]}\n")
@@ -92,7 +95,11 @@ if __name__ == '__main__':
                                         hyperparameter_set=sys.argv[1],
                                         nb_episode=nb_episode if nb_episode > 0 else 20000,
                                         seed=seed if seed >= 0 else 42),
-        10: lambda nb_episode, seed: AgentBasic(
+        10: lambda nb_episode, seed: AgentHeuristic(
+                                        hyperparameter_set=sys.argv[1],
+                                        nb_episode=nb_episode if nb_episode > 0 else 20000,
+                                        seed=seed if seed >= 0 else 42),
+        11: lambda nb_episode, seed: AgentQLearning(
                                         hyperparameter_set=sys.argv[1],
                                         nb_episode=nb_episode if nb_episode > 0 else 20000,
                                         seed=seed if seed >= 0 else 42),

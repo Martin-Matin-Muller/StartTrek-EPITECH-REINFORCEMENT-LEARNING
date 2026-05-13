@@ -7,14 +7,14 @@ import math
 class NoisyLinear(nn.Module):
     def __init__(self, in_features, out_features, sigma_init=0.5):
         super(NoisyLinear, self).__init__()
-        self.in_features  = in_features
+        self.in_features = in_features
         self.out_features = out_features
 
         # Paramètres appris — μ (valeur centrale) et σ (amplitude du bruit)
-        self.weight_mu    = nn.Parameter(torch.empty(out_features, in_features))
+        self.weight_mu = nn.Parameter(torch.empty(out_features, in_features))
         self.weight_sigma = nn.Parameter(torch.empty(out_features, in_features))
-        self.bias_mu      = nn.Parameter(torch.empty(out_features))
-        self.bias_sigma   = nn.Parameter(torch.empty(out_features))
+        self.bias_mu = nn.Parameter(torch.empty(out_features))
+        self.bias_sigma = nn.Parameter(torch.empty(out_features))
 
         # Bruit non appris, mis à jour à chaque reset_noise()
         self.register_buffer("weight_epsilon", torch.empty(out_features, in_features))
@@ -37,7 +37,7 @@ class NoisyLinear(nn.Module):
         Factorised Gaussian noise (plus efficace que le bruit indépendant).
         Au lieu de tirer in*out valeurs, on tire in + out valeurs et on les combine.
         """
-        eps_in  = self._f(torch.randn(self.in_features))
+        eps_in = self._f(torch.randn(self.in_features))
         eps_out = self._f(torch.randn(self.out_features))
         self.weight_epsilon.copy_(eps_out.outer(eps_in))
         self.bias_epsilon.copy_(eps_out)
@@ -51,11 +51,11 @@ class NoisyLinear(nn.Module):
         if self.training:
             # Pendant l'entraînement : poids bruités
             weight = self.weight_mu + self.weight_sigma * self.weight_epsilon
-            bias   = self.bias_mu   + self.bias_sigma   * self.bias_epsilon
+            bias = self.bias_mu   + self.bias_sigma   * self.bias_epsilon
         else:
             # Pendant l'évaluation (act avec eval()) : poids moyens, pas de bruit
             weight = self.weight_mu
-            bias   = self.bias_mu
+            bias = self.bias_mu
         return F.linear(x, weight, bias)
 
 
@@ -73,7 +73,7 @@ class QNetwork(nn.Module):
             self.layers.append(NoisyLinear(hidden_layer_neuron, hidden_layer_neuron))
 
         # Add Noisy Têtes Dueling — aussi en NoisyLinear
-        self.value_stream     = NoisyLinear(hidden_layer_neuron, 1)
+        self.value_stream = NoisyLinear(hidden_layer_neuron, 1)
         self.advantage_stream = NoisyLinear(hidden_layer_neuron, action_size)
 
     def forward(self, state):

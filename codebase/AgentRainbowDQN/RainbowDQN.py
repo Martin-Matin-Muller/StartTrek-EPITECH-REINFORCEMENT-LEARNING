@@ -48,15 +48,15 @@ class AgentRainbowDQN():
         torch.manual_seed(seed)
         self.nb_step = 0
 
-        self.per_alpha       = 0.7
-        self.per_beta_start  = 0.5
+        self.per_alpha = 0.7
+        self.per_beta_start = 0.5
         self.per_beta_frames = 150_000
         self.n_step = 3
 
         # ADD C51 (Distributional RL)
         self.n_atoms = 51
-        self.v_min   = -300   # score minimum possible sur LunarLander
-        self.v_max   =  300   # score maximum possible
+        self.v_min = -300   # score minimum possible sur LunarLander
+        self.v_max =  300   # score maximum possible
 
         hp = self.hyperparameters
 
@@ -141,7 +141,7 @@ class AgentRainbowDQN():
 
     def _get_nstep_info(self):
         """Calcule le return N-step à partir du début du buffer."""
-        state_n  = self._nstep_buffer[0][0]
+        state_n = self._nstep_buffer[0][0]
         action_n = self._nstep_buffer[0][1]
 
         reward_n = 0.0
@@ -151,7 +151,7 @@ class AgentRainbowDQN():
                 break
 
         next_state_n = self._nstep_buffer[-1][3]
-        done_n       = self._nstep_buffer[-1][4]
+        done_n = self._nstep_buffer[-1][4]
         return state_n, action_n, reward_n, next_state_n, done_n
 
     def act(self, state, fuel, eps=0.):
@@ -177,9 +177,9 @@ class AgentRainbowDQN():
         # ── Étape 1 : construire la distribution cible m ─────────────────────
         with torch.no_grad():
             # DDQN : le réseau local choisit la meilleure action …
-            next_dist_local  = self.qnetwork_local(next_states)          # (B, A, Z)
-            next_q_local     = (next_dist_local * self.support).sum(2)   # (B, A)
-            best_actions     = next_q_local.argmax(1)                    # (B,)
+            next_dist_local = self.qnetwork_local(next_states)          # (B, A, Z)
+            next_q_local = (next_dist_local * self.support).sum(2)   # (B, A)
+            best_actions = next_q_local.argmax(1)                    # (B,)
 
             # … le réseau cible évalue la distribution de cette action
             next_dist_target = self.qnetwork_target(next_states)         # (B, A, Z)
@@ -205,8 +205,8 @@ class AgentRainbowDQN():
                                 (next_dist_target * (b - l.float())).view(-1))
 
         # ── Étape 2 : distribution prédite pour les actions effectuées ────────
-        dist     = self.qnetwork_local(states)                            # (B, A, Z)
-        log_p    = torch.log(dist[range(batch_size), actions.squeeze(1)] + 1e-8)  # (B, Z)
+        dist = self.qnetwork_local(states)                            # (B, A, Z)
+        log_p = torch.log(dist[range(batch_size), actions.squeeze(1)] + 1e-8)  # (B, Z)
 
         # ── Étape 3 : cross-entropie pondérée par les poids IS (PER) ─────────
         element_wise_loss = -(m * log_p).sum(dim=1, keepdim=True)        # (B, 1)
@@ -250,7 +250,7 @@ class AgentRainbowDQN():
         self.support = torch.linspace(self.v_min, self.v_max, self.n_atoms).to(device)
         self.delta_z = (self.v_max - self.v_min) / (self.n_atoms - 1)
 
-        self.qnetwork_local  = QNetwork(self.state_size, self.action_size, self.seed, self.activation_function,
+        self.qnetwork_local = QNetwork(self.state_size, self.action_size, self.seed, self.activation_function,
                                         self.nb_neuron, self.nb_layer,
                                         n_atoms=self.n_atoms).to(device)  # ADD C51
         self.qnetwork_target = QNetwork(self.state_size, self.action_size, self.seed, self.activation_function,
@@ -382,8 +382,8 @@ class AgentRainbowDQN():
 class SumTree:
     def __init__(self, capacity: int):
         self.capacity = capacity
-        self.tree     = np.zeros(2 * capacity - 1, dtype=np.float64)
-        self.write    = 0          # next leaf to overwrite
+        self.tree = np.zeros(2 * capacity - 1, dtype=np.float64)
+        self.write = 0          # next leaf to overwrite
         self.n_entries = 0         # filled entries (≤ capacity)
 
     # ── internal helpers ────────────────────────────────────────────────────
@@ -465,29 +465,29 @@ class PrioritizedReplayBuffer:
         seed:         int,
         alpha:        float = 0.6,
         beta_start:   float = 0.4,
-        beta_frames:  int   = 100_000,
+        beta_frames:  int = 100_000,
         eps:          float = 1e-6,
         device: str = "cpu",
     ):
         self.action_size = action_size
-        self.batch_size  = batch_size
-        self.alpha       = alpha
-        self.beta_start  = beta_start
+        self.batch_size = batch_size
+        self.alpha = alpha
+        self.beta_start = beta_start
         self.beta_frames = beta_frames
-        self.eps         = eps
-        self.device      = device
-        self.frame       = 1          # incremented each time sample() is called
+        self.eps = eps
+        self.device = device
+        self.frame = 1          # incremented each time sample() is called
 
         random.seed(seed)
         np.random.seed(seed)
 
         self.tree = SumTree(buffer_size)
         # Pre-allocate numpy arrays for O(1) index-access to stored experiences
-        self.states      = np.zeros((buffer_size, state_size), dtype=np.float32)
+        self.states = np.zeros((buffer_size, state_size), dtype=np.float32)
         self.next_states = np.zeros((buffer_size, state_size), dtype=np.float32)
-        self.actions     = np.zeros((buffer_size,), dtype=np.int64)
-        self.rewards     = np.zeros((buffer_size,), dtype=np.float32)
-        self.dones       = np.zeros((buffer_size,), dtype=np.float32)
+        self.actions = np.zeros((buffer_size,), dtype=np.int64)
+        self.rewards = np.zeros((buffer_size,), dtype=np.float32)
+        self.dones = np.zeros((buffer_size,), dtype=np.float32)
 
         self._max_priority = 1.0    # maintained so new transitions start high
 
@@ -506,11 +506,11 @@ class PrioritizedReplayBuffer:
     def add(self, state, action, reward, next_state, done):
         """Add a new transition with maximum priority so it is sampled soon."""
         data_idx = self.tree.add(self._max_priority)
-        self.states[data_idx]      = state
-        self.actions[data_idx]     = action
-        self.rewards[data_idx]     = reward
+        self.states[data_idx] = state
+        self.actions[data_idx] = action
+        self.rewards[data_idx] = reward
         self.next_states[data_idx] = next_state
-        self.dones[data_idx]       = float(done)
+        self.dones[data_idx] = float(done)
 
     def sample(self):
         """
@@ -525,7 +525,7 @@ class PrioritizedReplayBuffer:
         beta = self._beta()
         self.frame += 1
 
-        indices    = np.empty(self.batch_size, dtype=np.int32)
+        indices = np.empty(self.batch_size, dtype=np.int32)
         priorities = np.empty(self.batch_size, dtype=np.float64)
 
         # Stratified sampling: divide the priority sum into equal segments
@@ -533,25 +533,25 @@ class PrioritizedReplayBuffer:
         for i in range(self.batch_size):
             lo = segment * i
             hi = segment * (i + 1)
-            s  = random.uniform(lo, hi)
+            s = random.uniform(lo, hi)
             idx, p = self.tree.get(s)
-            indices[i]    = idx
+            indices[i] = idx
             priorities[i] = p
 
         # Importance-sampling weights
         # w_i = (1/N · 1/P(i))^β   normalised by max weight for stability
-        n          = self.tree.n_entries
-        probs      = priorities / self.tree.total
+        n = self.tree.n_entries
+        probs = priorities / self.tree.total
         raw_weights = (n * probs) ** (-beta)
-        is_weights  = (raw_weights / raw_weights.max()).astype(np.float32)
+        is_weights = (raw_weights / raw_weights.max()).astype(np.float32)
 
         # Build batched tensors
         states = torch.from_numpy(self.states[indices]).float().to(self.device)
-        actions     = torch.from_numpy(self.actions[indices]).long().unsqueeze(1).to(self.device)
-        rewards     = torch.from_numpy(self.rewards[indices]).float().unsqueeze(1).to(self.device)
+        actions = torch.from_numpy(self.actions[indices]).long().unsqueeze(1).to(self.device)
+        rewards = torch.from_numpy(self.rewards[indices]).float().unsqueeze(1).to(self.device)
         next_states = torch.from_numpy(np.vstack(self.next_states[indices])).float().to(self.device)
-        dones       = torch.from_numpy(self.dones[indices]).float().unsqueeze(1).to(self.device)
-        is_weights  = torch.from_numpy(is_weights).float().unsqueeze(1).to(self.device)
+        dones = torch.from_numpy(self.dones[indices]).float().unsqueeze(1).to(self.device)
+        is_weights = torch.from_numpy(is_weights).float().unsqueeze(1).to(self.device)
 
         return (states, actions, rewards, next_states, dones), indices, is_weights
 

@@ -8,7 +8,7 @@ class LunarLanderDebug:
         self.total_reward = 0
         self.episode = 0
         self.widgets = {}   # nom -> func(wrapper, reward) -> value
-        self._state  = {}   # nom -> valeur pushée via .update()
+        self._state = {}   # nom -> valeur pushée via .update()
 
         pygame.init()
         self.font = pygame.font.SysFont("Arial", 18)
